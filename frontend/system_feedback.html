@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DressMate Feedback - System Status</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: { "primary": "#994ce6", "background-light": "#f7f6f8", "background-dark": "#191121" },
+        fontFamily: { "display": ["Inter"] },
+        borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .spinner {
+    border: 3px solid rgba(153, 76, 230, 0.1);
+    border-top: 3px solid #994ce6;
+    border-radius: 50%;
+    width: 48px; height: 48px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .progress-bar { transition: width 0.4s ease; }
+</style>
+</head>
+<body class="bg-background-light font-display text-slate-900 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+
+<header class="flex items-center justify-between whitespace-nowrap border-b border-primary/10 px-6 py-4 lg:px-40 bg-white backdrop-blur-md sticky top-0 z-50">
+  <div class="flex items-center gap-4">
+    <a href="index.html" class="flex items-center gap-4">
+      <div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+        <span class="material-symbols-outlined text-xl">styler</span>
+      </div>
+      <h2 class="text-lg font-bold tracking-tight">Fashion AI</h2>
+    </a>
+  </div>
+  <div class="flex items-center gap-4">
+    <button class="flex items-center justify-center rounded-full h-10 w-10 bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+      <span class="material-symbols-outlined">notifications</span>
+    </button>
+    <button class="flex items-center justify-center rounded-full h-10 w-10 bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+      <span class="material-symbols-outlined">settings</span>
+    </button>
+    <div class="size-10 rounded-full border-2 border-primary bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCyPpvLvEK362Y5e_RN_RclBwrTdgMMaC4v_qsYMSFg17tVmm2cT9oRCfX33KCdU22bq1Td4qDaTr_oaW9UmYL7ycFNRMKB5wTxozpG-PriXC1KkRwpfrhbNxn3R2qkb6kGvRB5CI-rqswskrb6ffi2Pu3Qr_OVf2Zv9CVD-4OBOVENJNl5h3DWQ3QrvdatJc3G0X1OCyygmLY3nIA-jw_JsZC8AuId-2jW-o7JVoIR_NEVTQ7qOd28jwOf4CrHgKtRAitik9Td3TI')"></div>
+  </div>
+</header>
+
+<main class="flex-1 flex flex-col items-center justify-start p-6 lg:px-40 py-12 gap-12">
+
+  <!-- Loading State -->
+  <section id="loadingSection" class="w-full max-w-2xl bg-white rounded-xl p-8 shadow-sm border border-primary/5">
+    <div class="flex flex-col items-center text-center gap-6">
+      <div class="relative">
+        <div class="spinner"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="material-symbols-outlined text-primary text-xl">temp_preferences_custom</span>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <h3 class="text-xl font-bold" id="statusText">Analyzing Your Style</h3>
+        <p class="text-slate-500 max-w-sm" id="statusSub">Our AI is scanning patterns, fabrics, and current trends to find your perfect match.</p>
+      </div>
+      <div class="w-full max-w-md flex flex-col gap-3">
+        <div class="flex justify-between text-sm font-medium">
+          <span class="text-primary" id="progressLabel">Matching silhouettes...</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
+          <div id="progressBar" class="h-full bg-primary rounded-full progress-bar" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom Nav -->
+  <nav class="w-full max-w-3xl grid grid-cols-5 gap-2 bg-white p-2 rounded-2xl shadow-xl border border-primary/10">
+    <a class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl hover:bg-primary/5 transition-colors" href="index.html">
+      <span class="material-symbols-outlined text-slate-400">home</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Home</span>
+    </a>
+    <a class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-primary/10 text-primary" href="image_upload_page.html">
+      <span class="material-symbols-outlined">upload</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider">Upload</span>
+    </a>
+    <a class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl hover:bg-primary/5 transition-colors" href="browse_products.html">
+      <span class="material-symbols-outlined text-slate-400">explore</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Browse</span>
+    </a>
+    <a class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl hover:bg-primary/5 transition-colors" href="my_wardrobe.html">
+      <span class="material-symbols-outlined text-slate-400">checkroom</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">My Wardrobe</span>
+    </a>
+    <a class="flex flex-col items-center justify-center gap-1 p-3 rounded-xl hover:bg-primary/5 transition-colors" href="gemini_stylist.html">
+      <span class="material-symbols-outlined text-slate-400">info</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Stylist</span>
+    </a>
+  </nav>
+</main>
+
+</div>
+</div>
+
+<script>
+  const steps = [
+    { label: 'Detecting clothing type...', pct: 20 },
+    { label: 'Matching silhouettes...', pct: 40 },
+    { label: 'Analyzing color palette...', pct: 60 },
+    { label: 'Finding similar items...', pct: 80 },
+    { label: 'Ranking results by style...', pct: 95 },
+    { label: 'Complete!', pct: 100 },
+  ];
+  let step = 0;
+
+  // Show uploaded image preview if available
+  const preview = sessionStorage.getItem('upload_preview');
+  if (preview) {
+    const img = document.createElement('img');
+    img.src = preview;
+    img.className = 'w-24 h-24 object-cover rounded-xl shadow-lg mx-auto mb-6';
+    const header = document.querySelector('main h1') || document.querySelector('main');
+    if (header && header.parentNode) header.parentNode.insertBefore(img, header);
+  }
+
+  function tick() {
+    if (step >= steps.length) {
+      window.location.href = 'recommendation_results.html';
+      return;
+    }
+    const s = steps[step];
+    document.getElementById('progressLabel').textContent = s.label;
+    document.getElementById('progressPct').textContent = s.pct + '%';
+    document.getElementById('progressBar').style.width = s.pct + '%';
+    step++;
+    if (step < steps.length) setTimeout(tick, 700);
+    else setTimeout(tick, 400);
+  }
+
+  // If results already came back from backend, animate fast
+  const hasResults = !!sessionStorage.getItem('recommendation_results');
+  const delay = hasResults ? 350 : 700;
+  setTimeout(function runFast() {
+    if (step >= steps.length) { window.location.href = 'recommendation_results.html'; return; }
+    const s = steps[step];
+    document.getElementById('progressLabel').textContent = s.label;
+    document.getElementById('progressPct').textContent = s.pct + '%';
+    document.getElementById('progressBar').style.width = s.pct + '%';
+    step++;
+    setTimeout(runFast, delay);
+  }, 400);
+</script>
+</body></html>

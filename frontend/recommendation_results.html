@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: { "primary": "#994ce6", "background-light": "#f7f6f8", "background-dark": "#191121" },
+        fontFamily: { "display": ["Inter"] },
+        borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<title>Fashion AI Recommendations</title>
+</head>
+<body class="bg-background-light font-display text-slate-900 antialiased">
+<!-- Navigation -->
+<header class="sticky top-0 z-50 bg-background-light/80 backdrop-blur-md border-b border-primary/10 px-4 md:px-10 py-3">
+  <div class="max-w-7xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-8">
+      <a class="flex items-center gap-3" href="index.html">
+        <div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+          <span class="material-symbols-outlined text-2xl">architecture</span>
+        </div>
+        <h2 class="text-xl font-bold tracking-tight">Fashion AI</h2>
+      </a>
+      <nav class="hidden md:flex items-center gap-6">
+        <a class="text-sm font-semibold hover:text-primary transition-colors" href="index.html">Home</a>
+        <a class="text-sm font-semibold hover:text-primary transition-colors" href="image_upload_page.html">Upload</a>
+        <a class="text-sm font-semibold text-primary" href="browse_products.html">Browse</a>
+        <a class="text-sm font-semibold hover:text-primary transition-colors" href="my_wardrobe.html">My Wardrobe</a>
+        <a class="text-sm font-semibold hover:text-primary transition-colors" href="gemini_stylist.html">AI Stylist</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-4 flex-1 justify-end max-w-md ml-4">
+      <div class="relative w-full hidden sm:block">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+        <input class="w-full bg-primary/5 border-none rounded-xl py-2 pl-10 pr-4 focus:ring-2 focus:ring-primary/50 text-sm" placeholder="Search trends..." type="text"/>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="p-2 text-slate-400 hover:text-primary transition-colors relative">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-2 right-2 size-2 bg-primary rounded-full"></span>
+        </button>
+        <div class="size-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/10 cursor-pointer">
+          <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtznFeJGuVqoyONo15k841njdBjOvPAY78FoEuCxkR7l9EHP_C-fcZag-o3fMbYH948OsqA9YccljbtKiPreEg7X_W92j0_VtquhYep_ETPeJpgJ43NJHXGTrcUWQWBMIXGQutZ9mJY8M9wXjKRHI0abv43B9H8Q6xFE0D8QIu5-2cptq7Ty64rXC6mRAJl_wEdxTVIMH5lYaUIp-qM7BtZ6OfWSMPL8pA7pN_x2p7jEC5Lw3WUShZG4qWfygsIbLglNbGviABOmw"/>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
+  <!-- Context Section -->
+  <section class="mb-12 bg-white p-6 rounded-xl border border-primary/5 shadow-sm">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="flex items-center gap-5">
+        <div class="relative group">
+          <div class="size-24 rounded-lg overflow-hidden border-4 border-white shadow-md">
+            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1IdejvWiZwGQMblnHMrMHk-K7ghwcJJAh11FomzTvA6ESMKVH_GIv2TzXb6hLOzdFnnkilfPZ3TPDX03D6bdPiK7bRvYUNrm34ssaKPmoUx1pfDFfvZGvcas6edH8vmFJ-Ra5pZOpSykvcji9N55zNSQUU1i3EMB_SkCx0XGDQgU0b4AuSq6up9shm6ooJas-1wR0C6qem2EfRlJp6EFyoWZQN05l40no-A8iMdyMIqIEdE131GSwJ2dZIn1oBNa91v01Nrn2YUw"/>
+          </div>
+          <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Source</div>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold mb-1">Results for your style</h1>
+          <p class="text-slate-500 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">auto_awesome</span>
+            AI analyzed your photo: Summer Dress, Vibrant Yellow, Cotton
+          </p>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="toggleFilters()" class="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary font-semibold rounded-lg hover:bg-primary/20 transition-all">
+          <span class="material-symbols-outlined text-lg">tune</span>
+          Filters
+        </button>
+        <a href="image_upload_page.html" class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-semibold rounded-lg shadow-lg shadow-primary/20 hover:brightness-110 transition-all">
+          <span class="material-symbols-outlined text-lg">upload</span>
+          New Search
+        </a>
+      </div>
+    </div>
+    <!-- Filter Panel (hidden by default) -->
+    <div id="filterPanel" class="hidden mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div>
+        <label class="text-xs font-bold uppercase text-slate-400 mb-2 block">Category</label>
+        <select class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary">
+          <option>All</option><option>Dresses</option><option>Tops</option><option>Bottoms</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-bold uppercase text-slate-400 mb-2 block">Color</label>
+        <select class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary">
+          <option>All</option><option>Yellow</option><option>White</option><option>Blue</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-bold uppercase text-slate-400 mb-2 block">Style</label>
+        <select class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary">
+          <option>All</option><option>Casual</option><option>Formal</option><option>Boho</option>
+        </select>
+      </div>
+      <div class="flex items-end">
+        <button class="w-full bg-primary text-white rounded-lg py-2 text-sm font-bold">Apply</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+
+    <!-- Cards with click-through to product detail -->
+    <script src="api.js"></script>
+    <script>
+      let allResults = [];
+      let currentPage = 0;
+      const PAGE_SIZE = 8;
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        const grid = document.getElementById('resultsGrid');
+        showSkeleton(grid, 8);
+
+        // 1. Try sessionStorage results from upload page
+        const stored = sessionStorage.getItem('recommendation_results');
+        if (stored) {
+          try {
+            const data = JSON.parse(stored);
+            if (data.results && data.results.length) {
+              allResults = data.results;
+              renderBatch(grid);
+
+              // Update header badges
+              if (data.skin_tone) {
+                const badge = document.createElement('span');
+                badge.className = 'px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold';
+                badge.textContent = '🎨 Skin tone: ' + data.skin_tone;
+                document.querySelector('main h1')?.insertAdjacentElement('afterend', badge);
+              }
+              return;
+            }
+            if (data.error) showError(grid, 'Backend error: ' + data.error);
+          } catch(e) {}
+        }
+
+        // 2. Fallback: fetch from /api/products
+        try {
+          const data = await API.listProducts({ page: 1, perPage: 16 });
+          if (data.results && data.results.length) {
+            allResults = data.results;
+            renderBatch(grid);
+          } else {
+            showError(grid, 'No results found.');
+          }
+        } catch(err) {
+          showError(grid, 'Could not connect to backend. Start the server and try again.');
+        }
+      });
+
+      function renderBatch(grid) {
+        const batch = allResults.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+        if (currentPage === 0) grid.innerHTML = '';
+        batch.forEach(p => { grid.innerHTML += renderProductCard(p, { showSimilarity: true }); });
+        currentPage++;
+        const total = allResults.length;
+        document.getElementById('showingCount').textContent =
+          `Showing ${Math.min(currentPage * PAGE_SIZE, total)} of ${total} results`;
+        document.getElementById('loadMoreBtn').classList.toggle('hidden', currentPage * PAGE_SIZE >= total);
+      }
+
+      function loadMore() { renderBatch(document.getElementById('resultsGrid')); }
+
+      function rateCard(btn, dir) {
+        const parent = btn.parentElement;
+        parent.querySelectorAll('button').forEach(b =>
+          b.classList.remove('bg-green-100','bg-red-100','text-green-600','text-red-600'));
+        btn.classList.add(dir === 'up' ? 'bg-green-100' : 'bg-red-100',
+                          dir === 'up' ? 'text-green-600' : 'text-red-600');
+      }
+
+      function toggleFilters() {
+        document.getElementById('filterPanel').classList.toggle('hidden');
+      }
+    </script>
+    <div id="resultsGrid" class="contents"></div>
+  </div>
+
+  <!-- Load More -->
+  <div class="mt-16 flex flex-col items-center gap-4">
+    <button id="loadMoreBtn" onclick="loadMore()"
+            class="hidden px-10 py-4 bg-white border border-primary/20 hover:border-primary text-primary font-bold rounded-xl transition-all shadow-sm hover:shadow-md">
+      Load More Recommendations
+    </button>
+    <p id="showingCount" class="text-slate-400 text-sm">Loading…</p>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="mt-20 border-t border-slate-100 py-12 bg-white">
+  <div class="max-w-7xl mx-auto px-4 md:px-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+      <div class="col-span-2 md:col-span-1">
+        <div class="flex items-center gap-2 mb-6">
+          <div class="size-6 bg-primary rounded flex items-center justify-center text-white"><span class="material-symbols-outlined text-sm">architecture</span></div>
+          <span class="font-bold">Fashion AI</span>
+        </div>
+        <p class="text-sm text-slate-500 leading-relaxed">Transforming the way you shop using the power of neural style matching.</p>
+      </div>
+      <div><h4 class="font-bold mb-6">Explore</h4><ul class="space-y-4 text-sm text-slate-500"><li><a class="hover:text-primary" href="index.html">Home</a></li><li><a class="hover:text-primary" href="image_upload_page.html">Upload</a></li><li><a class="hover:text-primary" href="browse_products.html">Browse</a></li></ul></div>
+      <div><h4 class="font-bold mb-6">Account</h4><ul class="space-y-4 text-sm text-slate-500"><li><a class="hover:text-primary" href="my_wardrobe.html">My Wardrobe</a></li><li><a class="hover:text-primary" href="#">Style Profile</a></li><li><a class="hover:text-primary" href="#">Saved Items</a></li></ul></div>
+      <div><h4 class="font-bold mb-6">Company</h4><ul class="space-y-4 text-sm text-slate-500"><li><a class="hover:text-primary" href="#">About</a></li><li><a class="hover:text-primary" href="gemini_stylist.html">AI Stylist</a></li><li><a class="hover:text-primary" href="#">Privacy</a></li></ul></div>
+    </div>
+    <div class="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between gap-4">
+      <p class="text-xs text-slate-400">© 2024 Fashion AI Inc. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+</body></html>

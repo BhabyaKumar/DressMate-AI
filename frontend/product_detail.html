@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: { "primary": "#994ce6", "background-light": "#f7f6f8", "background-dark": "#191121" },
+        fontFamily: { "display": ["Inter", "sans-serif"] },
+        borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<title>AI Fashion - Style Insight</title>
+</head>
+<body class="bg-background-light font-display text-slate-900 antialiased">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+
+<!-- Navigation -->
+<header class="sticky top-0 z-50 w-full border-b border-primary/10 bg-background-light/80 backdrop-blur-md px-6 md:px-10 py-4">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-8">
+    <div class="flex items-center gap-12">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
+          <span class="material-symbols-outlined text-2xl">auto_awesome</span>
+        </div>
+        <h1 class="text-xl font-bold tracking-tight text-slate-900">AI Fashion</h1>
+      </a>
+      <nav class="hidden md:flex items-center gap-6">
+        <a class="text-sm font-semibold hover:text-primary transition-colors" href="index.html">Home</a>
+        <a class="text-sm font-semibold hover:text-primary transition-colors" href="image_upload_page.html">Upload</a>
+        <a class="text-sm font-semibold hover:text-primary transition-colors" href="browse_products.html">Browse</a>
+        <a class="text-sm font-semibold hover:text-primary transition-colors" href="my_wardrobe.html">My Wardrobe</a>
+        <a class="text-sm font-semibold hover:text-primary transition-colors" href="gemini_stylist.html">AI Stylist</a>
+      </nav>
+    </div>
+    <div class="flex flex-1 items-center justify-end gap-4">
+      <div class="relative hidden lg:block w-full max-w-xs">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+        <input class="w-full rounded-xl border-none bg-primary/5 py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/50" placeholder="Find your style..." type="text"/>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="my_wardrobe.html" class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-slate-700 hover:bg-primary/20 transition-colors">
+          <span class="material-symbols-outlined">bookmark</span>
+        </a>
+        <button class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-slate-700 hover:bg-primary/20 transition-colors">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <div class="h-10 w-10 rounded-full bg-cover bg-center border-2 border-primary/20 cursor-pointer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC0PysXgo076iDu-B1mvObBUOcKMarpxR8QPLUT7l1MaEasBpMbQzFfi9nkZnVfB6IZOvh_50F-UkO3aio9ZMzGs3r9-Vj8nhwg0rRB_a5XD6zgarx04Z_cmvMMBSSkuyTByT2E0ZwDbg2-8XCxlvqn-NFidamnCYkIQ0AgSSwL0HtFe6JQgOH4_K52A3zBe8L3Pcg2Oa38byOhBpsmDidZyFK2L0GvCo1BhOSbXVLOp2C0TT7HclMbP_NaLmLwAY-jKUCummW0zBM");'></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Breadcrumb -->
+<div class="max-w-7xl mx-auto w-full px-6 md:px-10 pt-4">
+  <nav class="flex items-center gap-2 text-sm text-slate-500">
+    <a href="index.html" class="hover:text-primary transition-colors">Home</a>
+    <span class="material-symbols-outlined text-xs">chevron_right</span>
+    <a href="browse_products.html" class="hover:text-primary transition-colors">Browse</a>
+    <span class="material-symbols-outlined text-xs">chevron_right</span>
+    <span class="text-slate-900 font-medium">Silk Tailored Blazer</span>
+  </nav>
+</div>
+
+<main class="mx-auto w-full max-w-7xl flex-1 px-6 py-8 md:px-10">
+  <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
+
+    <!-- Image Gallery -->
+    <div class="space-y-4">
+      <div class="aspect-[4/5] w-full overflow-hidden rounded-xl bg-slate-200">
+        <img id="mainImg" alt="Silk Tailored Blazer" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD38JE8dzhwe7rfFd-0M4QiccQUc4L_3Hw1xql9k2O4TbM59_BmAjgOHognkRSpkm0fKVlf3pGiBvOAJ3OtmTsuab3hN-XTc59HJ1A6ci1OoKOO8EU6sBUrZxUlYp1B89Zo-832HUW-ylSTvbBegUqtjQR93q6WCsdw5SqZkRTwzWHATxHOZL3hGi0-HKWELoksP_36XzCzrTZdZBkAcSMuJJCmpuj_GtV3yUbKj5bihkliOncw0lBYDYNRhFkoSD5722XxO2JFBL8"/>
+      </div>
+      <div class="grid grid-cols-4 gap-4" id="thumbs">
+        <div class="aspect-square cursor-pointer overflow-hidden rounded-lg ring-2 ring-primary" onclick="setMain(this, 'https://lh3.googleusercontent.com/aida-public/AB6AXuBEn-A1bzC_Q9WuYEIVnAo5XP7cXkVMbaRXchioSqlaGSJMMYiddKPNieXGgDzBbK8LYwx8yrzGIRNenbjNYplU5zzIATT0MFv56L9BiXa0FiDDzMk35eFbyHfWktrm-aTkl5lEq47wVR5Zy4B_VKhoRYIkOrlyWsqwE-yAQ-d0f8-p0v_7do7Izz0mQSnHOBNjmP3ryaxj2pElvhBpi---NgW6Z0XT2uRMvF8EWSCoXgccPZ-8gIoBdaD_0vzFyg9CJgL33G4vA7U')">
+          <img alt="View 1" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEn-A1bzC_Q9WuYEIVnAo5XP7cXkVMbaRXchioSqlaGSJMMYiddKPNieXGgDzBbK8LYwx8yrzGIRNenbjNYplU5zzIATT0MFv56L9BiXa0FiDDzMk35eFbyHfWktrm-aTkl5lEq47wVR5Zy4B_VKhoRYIkOrlyWsqwE-yAQ-d0f8-p0v_7do7Izz0mQSnHOBNjmP3ryaxj2pElvhBpi---NgW6Z0XT2uRMvF8EWSCoXgccPZ-8gIoBdaD_0vzFyg9CJgL33G4vA7U"/>
+        </div>
+        <div class="aspect-square cursor-pointer overflow-hidden rounded-lg opacity-60 hover:opacity-100 transition-opacity" onclick="setMain(this, 'https://lh3.googleusercontent.com/aida-public/AB6AXuC5TjQUCxeeGzH4iVQD56iJO9A0adervMiI12vVsmFoB9wdUGDqV9bsnTH13z7TTDVm9k_9_A7G90nUb_NGmwRKfoHZeKn7iAu-FXM4WC_UiSPoFB7CNk35sWAr31Hc4RARYGW0yi2Zn2751tPNgNc4-4lRPPtyPM1EwbTHEsVriRxEpbFLU4QxcJ3Ganh6difdl9tby5Lquu-JCAP4NGfauCS6BBPtd5S8aEeAyoEitMfUoAprjbR_f88zPLbV3nbFRDdxhiadNNQ')">
+          <img alt="View 2" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5TjQUCxeeGzH4iVQD56iJO9A0adervMiI12vVsmFoB9wdUGDqV9bsnTH13z7TTDVm9k_9_A7G90nUb_NGmwRKfoHZeKn7iAu-FXM4WC_UiSPoFB7CNk35sWAr31Hc4RARYGW0yi2Zn2751tPNgNc4-4lRPPtyPM1EwbTHEsVriRxEpbFLU4QxcJ3Ganh6difdl9tby5Lquu-JCAP4NGfauCS6BBPtd5S8aEeAyoEitMfUoAprjbR_f88zPLbV3nbFRDdxhiadNNQ"/>
+        </div>
+        <div class="aspect-square cursor-pointer overflow-hidden rounded-lg opacity-60 hover:opacity-100 transition-opacity" onclick="setMain(this, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCF4n2cNMP0DKhoUVqzyultL-rYS_J17yvkVXirqpEL1_8uThEX_cy9886iXDVEf4JyvNoJC0ZbuOHCtL6_Lr5gEoT1QbUNI-sDsqavktHpVPeOZ7Bah0IoD9j43f-mFi7bnJ0NBDDaqRlOmY6orMjqYw43XAtRUKOxFeSUA3_Xiga3BbBhxnW0I1LuTEF4hdFiwMYb_aBZpwRbBuQnOOSmgluWv0eP5iXvEc0jhBUbCNXGSdo0mVOcaUe7yIMJ7U2UsYqbR9bxjH8')">
+          <img alt="View 3" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF4n2cNMP0DKhoUVqzyultL-rYS_J17yvkVXirqpEL1_8uThEX_cy9886iXDVEf4JyvNoJC0ZbuOHCtL6_Lr5gEoT1QbUNI-sDsqavktHpVPeOZ7Bah0IoD9j43f-mFi7bnJ0NBDDaqRlOmY6orMjqYw43XAtRUKOxFeSUA3_Xiga3BbBhxnW0I1LuTEF4hdFiwMYb_aBZpwRbBuQnOOSmgluWv0eP5iXvEc0jhBUbCNXGSdo0mVOcaUe7yIMJ7U2UsYqbR9bxjH8"/>
+        </div>
+        <div class="aspect-square cursor-pointer overflow-hidden rounded-lg opacity-60 hover:opacity-100 transition-opacity" onclick="setMain(this, 'https://lh3.googleusercontent.com/aida-public/AB6AXuCNFryw9nDZ88Y_rOHtgXZeAtZQMFLgZiSPbz3g32VbQdTvs5-V_zMmSQTjZQhraCOByhlRw7YAAmUS0PjPThYqVdyyMes3R2C2bSqSY_hioAvhhFRoYbtF4kctA6A-O_d--SGJgT08KWFsRpgRhHzSknN7G8R-OBkMXj36kyOdCWtByewjqzVWbIF1reb6B12s3hfnu5YQ_A8jQJpJzisdlZO0x289Uco1-Wb-UzMDC2uszmoCapMLelkD3A5hJ6BL3R2CVhFH0GE')">
+          <img alt="View 4" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNFryw9nDZ88Y_rOHtgXZeAtZQMFLgZiSPbz3g32VbQdTvs5-V_zMmSQTjZQhraCOByhlRw7YAAmUS0PjPThYqVdyyMes3R2C2bSqSY_hioAvhhFRoYbtF4kctA6A-O_d--SGJgT08KWFsRpgRhHzSknN7G8R-OBkMXj36kyOdCWtByewjqzVWbIF1reb6B12s3hfnu5YQ_A8jQJpJzisdlZO0x289Uco1-Wb-UzMDC2uszmoCapMLelkD3A5hJ6BL3R2CVhFH0GE"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="flex flex-col">
+      <div class="mb-6 flex flex-wrap items-center gap-2">
+        <span class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">AI Recommended</span>
+        <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">Spring Collection 2024</span>
+      </div>
+      <h2 class="text-4xl font-black tracking-tight text-slate-900 md:text-5xl">Silk Tailored Blazer</h2>
+      <div class="mt-4 flex items-center justify-between">
+        <p class="text-sm font-medium text-slate-500 italic uppercase tracking-widest">Feedback Requested</p>
+        <div class="flex items-center gap-1">
+          <span class="material-symbols-outlined text-yellow-500">star</span>
+          <span class="font-bold text-slate-900">4.8</span>
+          <span class="text-sm text-slate-500">(124 community ratings)</span>
+        </div>
+      </div>
+
+      <div class="mt-8 space-y-6">
+        <div>
+          <h3 class="text-sm font-bold uppercase tracking-widest text-slate-500">Style Tags</h3>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <span class="rounded-lg border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium">Quiet Luxury</span>
+            <span class="rounded-lg border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium">Office Chic</span>
+            <span class="rounded-lg border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium">Minimalist</span>
+          </div>
+        </div>
+
+        <div class="rounded-xl bg-primary/5 p-6 border border-primary/10">
+          <div class="flex items-center gap-2 mb-4 text-primary">
+            <span class="material-symbols-outlined">lightbulb</span>
+            <span class="font-bold text-sm">AI Stylist Insight</span>
+          </div>
+          <p class="ai-insight-text text-sm leading-relaxed text-slate-600">
+            Based on your browsing history, this blazer perfectly complements the "Tailored Trousers" you viewed yesterday. The cream ivory shade aligns with your preferred neutral palette.
+            <a href="gemini_stylist.html" class="text-primary font-semibold ml-1 hover:underline">Chat with AI Stylist →</a>
+          </p>
+        </div>
+
+        <!-- Rating Buttons -->
+        <div class="grid grid-cols-1 gap-4">
+          <div class="flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-primary/20 bg-primary/5 px-8 py-6">
+            <p class="text-sm font-bold text-primary">How accurate is this recommendation for your style?</p>
+            <div class="flex items-center gap-6">
+              <button id="btn-match" onclick="rateProduct('match')" class="group flex flex-col items-center gap-2 hover:text-green-500 transition-colors">
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm border border-slate-200 group-hover:border-green-500 transition-all">
+                  <span class="material-symbols-outlined text-2xl">thumb_up</span>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-tighter">Perfect Match</span>
+              </button>
+              <button id="btn-nomatch" onclick="rateProduct('nomatch')" class="group flex flex-col items-center gap-2 hover:text-red-500 transition-colors">
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm border border-slate-200 group-hover:border-red-500 transition-all">
+                  <span class="material-symbols-outlined text-2xl">thumb_down</span>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-tighter">Not My Style</span>
+              </button>
+              <button id="btn-save" onclick="saveItem()" class="group flex flex-col items-center gap-2 hover:text-primary transition-colors">
+                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm border border-slate-200 group-hover:border-primary transition-all">
+                  <span class="material-symbols-outlined text-2xl">bookmark</span>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-tighter">Save for later</span>
+              </button>
+            </div>
+            <div id="ratingMsg" class="hidden text-xs font-semibold text-primary mt-2 text-center"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Specs -->
+      <div class="mt-10 border-t border-slate-200 pt-8">
+        <h3 class="text-lg font-bold mb-4">Product Specifications</h3>
+        <div class="grid grid-cols-1 gap-y-4">
+          <div class="flex items-center justify-between py-2 border-b border-slate-100"><span class="text-slate-500 text-sm">Category</span><span class="text-sm font-medium">Outerwear</span></div>
+          <div class="flex items-center justify-between py-2 border-b border-slate-100"><span class="text-slate-500 text-sm">Color</span><span class="text-sm font-medium">Cream Ivory</span></div>
+          <div class="flex items-center justify-between py-2 border-b border-slate-100"><span class="text-slate-500 text-sm">Material</span><span class="text-sm font-medium">100% Mulberry Silk</span></div>
+          <div class="flex items-center justify-between py-2"><span class="text-slate-500 text-sm">Fit</span><span class="text-sm font-medium">True to size</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Similar Styles -->
+  <section class="mt-24">
+    <div class="mb-8 flex items-end justify-between">
+      <div>
+        <h3 class="text-2xl font-bold tracking-tight">Similar Styles</h3>
+        <p class="mt-1 text-slate-500">AI-curated alternatives you might like</p>
+      </div>
+      <a class="text-sm font-bold text-primary flex items-center gap-1 hover:underline" href="browse_products.html">
+        View all <span class="material-symbols-outlined text-xs">arrow_forward</span>
+      </a>
+    </div>
+    <div id="similarGrid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="group relative flex flex-col overflow-hidden rounded-xl bg-white border border-slate-100 transition-shadow hover:shadow-xl cursor-pointer" onclick="location.href='product_detail.html'">
+        <div class="aspect-[3/4] overflow-hidden"><img alt="Similar 1" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQSveg5ZEFZHt5TXkofp4Xko_g6uTYY0EmQxuNbP2IxYvtVt26sot84Fw0kSAnqx5Z4eOIShCLc-Sv5CBfEggCiCVGEpVjiYduFXB6EG12PqKfU3BlBZl258H6viH6miAcTIQVJzUtCRtzAOAO-9A1yuEMvQklZNTruHje7NyiZAi7mU69VoXhRWxcEnhl_uB2iOTBX_rUiM0m9N6k7lS-ZCM6nStjXByeITzMet85M3UOwuFHv_obHzScgNg2xA349G7brTqmeVw"/>
+          <button class="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-slate-900 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-sm">favorite</span></button>
+        </div>
+        <div class="flex flex-col p-4">
+          <p class="text-xs text-slate-500 uppercase font-bold tracking-tighter">Linen Blend</p>
+          <h4 class="mt-1 text-sm font-bold">Linen Structured Blazer</h4>
+          <div class="mt-4 flex items-center gap-2">
+            <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-green-100 hover:text-green-600 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+            <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-red-100 hover:text-red-600 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="group relative flex flex-col overflow-hidden rounded-xl bg-white border border-slate-100 transition-shadow hover:shadow-xl cursor-pointer" onclick="location.href='product_detail.html'">
+        <div class="aspect-[3/4] overflow-hidden"><img alt="Similar 2" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgUhU-Z9_LzMx2pr4tTzbw7TzMdE0isxIvDyh33F5KVjINGO-ZYt1iWnk9R_hER66cOFZZKOAwNSxOn0lnoov4YlUUfTOTugdlRsle9eecsf29HxD2kkCo6YFeROhQsdEcaS_wbBNq7HMTIvcX4FSXcww4HpdPQtMGpF_BFJ5R_N_p0F30Thimsqj72ZMgpbGHs_B1x3vcnaG_80oIIFU4ePMufvBPC9BLLc4dR2FQ-1zwBQFWZR1Z61pMkVirtBfQhW0AbT-iakI"/>
+          <button class="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-slate-900 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-sm">favorite</span></button>
+        </div>
+        <div class="flex flex-col p-4">
+          <p class="text-xs text-slate-500 uppercase font-bold tracking-tighter">Evening Wear</p>
+          <h4 class="mt-1 text-sm font-bold">Double Breasted Tuxedo</h4>
+          <div class="mt-4 flex items-center gap-2">
+            <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-green-100 hover:text-green-600 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+            <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-red-100 hover:text-red-600 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="group relative flex flex-col overflow-hidden rounded-xl bg-white border border-slate-100 transition-shadow hover:shadow-xl cursor-pointer" onclick="location.href='product_detail.html'">
+        <div class="aspect-[3/4] overflow-hidden"><img alt="Similar 3" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXixUu_0B0pGmfRLPoGCoIrYU-8dVZGXXaUGlxqbKCrcsU9foytZ896yXUtz76f-EKOGFltzGz-JDBVmhcBylOzlDWXu8e-M-R8p-VpkPla-aNDtMc0Qst39_17A_YN4sWmwCQeQyNLvG-UguaQ6lFptYu1YpZXCiztJLz-uHyRdyXSkJw4pvY__2g6WtdpUu-DP6Jb50AsdYY9a_sUiKwro836Ny9Ih40ssy4HLQY6MlqtvlxDR7dHT3TILTzxxosqnVMBPpCR1U"/>
+          <button class="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-slate-900 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-sm">favorite</span></button>
+        </div>
+        <div class="flex flex-col p-4">
+          <p class="text-xs text-slate-500 uppercase font-bold tracking-tighter">Wool Collection</p>
+          <h4 class="mt-1 text-sm font-bold">Merino Wool Longcoat</h4>
+          <div class="mt-4 flex items-center gap-2">
+            <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-green-100 hover:text-green-600 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+            <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-red-100 hover:text-red-600 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="group relative flex flex-col overflow-hidden rounded-xl bg-white border border-slate-100 transition-shadow hover:shadow-xl cursor-pointer" onclick="location.href='product_detail.html'">
+        <div class="aspect-[3/4] overflow-hidden"><img alt="Similar 4" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCV59Cpzcebp1BUM3nvErKsDeGeW96i1KQl659eoqUttUSWxjiLnoytXaOxqMXH8qdKmgOOGqe10BoZ_ozFzCLR8mcUOSh_PsFpquNFwtCON6sVmPBLO9fbQrVMdjiTF7-dKrf6HV2Hz7BXhBSbC5DwFYTnF6rafJEZmZfsZootCg5ps-DF1KKRU1Xb7ruA9QhsMP2ydlobQWEO1XFDLrUA4u20tvIgzmyf2U0XbuB0OxOf1U4Z6CiV89Nz-csx-wJPvLzeSEn0gBk"/>
+          <button class="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-slate-900 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-sm">favorite</span></button>
+        </div>
+        <div class="flex flex-col p-4">
+          <p class="text-xs text-slate-500 uppercase font-bold tracking-tighter">Satin Luxe</p>
+          <h4 class="mt-1 text-sm font-bold">Silk Bomber Jacket</h4>
+          <div class="mt-4 flex items-center gap-2">
+            <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-green-100 hover:text-green-600 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+            <button class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 hover:bg-red-100 hover:text-red-600 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="mt-20 border-t border-slate-200 bg-white py-12 px-6 md:px-10">
+  <div class="mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-4 gap-10">
+    <div><div class="flex items-center gap-3 mb-6"><div class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white"><span class="material-symbols-outlined text-lg">auto_awesome</span></div><h2 class="text-lg font-bold tracking-tight">AI Fashion</h2></div><p class="text-sm text-slate-500 leading-relaxed">Personalizing the future of style with advanced AI recommendation engines.</p></div>
+    <div><h4 class="font-bold mb-6">Explore</h4><ul class="space-y-4 text-sm text-slate-500"><li><a class="hover:text-primary" href="index.html">Home</a></li><li><a class="hover:text-primary" href="browse_products.html">Browse</a></li><li><a class="hover:text-primary" href="gemini_stylist.html">Style Guide</a></li></ul></div>
+    <div><h4 class="font-bold mb-6">Transparency</h4><ul class="space-y-4 text-sm text-slate-500"><li><a class="hover:text-primary" href="#">Data Usage</a></li><li><a class="hover:text-primary" href="#">AI Ethics</a></li><li><a class="hover:text-primary" href="#">Contact Us</a></li></ul></div>
+    <div><h4 class="font-bold mb-6">Subscribe</h4><p class="text-sm text-slate-500 mb-4">Get personalized style insights.</p><div class="flex gap-2"><input class="flex-1 rounded-lg border-slate-200 bg-transparent text-sm focus:ring-primary focus:border-primary" placeholder="Email" type="email"/><button class="bg-primary px-4 py-2 rounded-lg text-white font-bold text-sm">Join</button></div></div>
+  </div>
+  <div class="mx-auto max-w-7xl mt-12 pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
+    <p class="text-xs text-slate-400">© 2024 AI Fashion Inc. All rights reserved.</p>
+  </div>
+</footer>
+
+</div>
+<script src="api.js"></script>
+<script>
+  // ── helpers ──────────────────────────────────────────────────────────────
+  function fixImageUrl(url) {
+    if (!url) return 'https://placehold.co/600x800?text=No+Image';
+    if (url.startsWith('http')) return url;
+    if (url.startsWith('/images/')) return API_BASE + url;
+    // relative path like "Images\foo.jpg" or "Images/foo.jpg"
+    const filename = url.replace(/\\/g, '/').split('/').pop();
+    return API_BASE + '/images/' + filename;
+  }
+
+  function stripHtml(html) {
+    // Remove all HTML tags and decode entities
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  }
+
+  // ── Load product from backend using ?id= URL param ──────────────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    const params    = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    if (!productId) return; // no ID = keep the static demo content
+
+    try {
+      const data = await API.getProduct(Number(productId));
+      const p    = data.product;
+
+      // ── Title (h1) ──
+      const h1 = document.querySelector('h1');
+      if (h1 && p.name) h1.textContent = p.name;
+
+      // ── Brand ──
+      document.querySelectorAll('p, span').forEach(el => {
+        if (el.textContent.trim() === 'Aetheria' && p.brand) el.textContent = p.brand;
+      });
+
+      // ── Price ──
+      if (p.price) {
+        document.querySelectorAll('[class*="text-4xl"], [class*="text-3xl"]').forEach(el => {
+          if (el.textContent.includes('₹') || el.textContent.match(/\d/)) {
+            el.textContent = '₹' + p.price;
+          }
+        });
+      }
+
+      // ── Description — strip HTML tags ──
+      if (p.description) {
+        const clean = stripHtml(p.description);
+        // Find the AI Stylist Insight box or any description paragraph
+        const descEl = document.querySelector('.ai-insight-text') ||
+                       document.querySelector('[class*="text-slate-600"][class*="leading"]') ||
+                       document.querySelector('[class*="prose"]');
+        if (descEl) descEl.textContent = clean;
+      }
+
+      // ── Main image ──
+      const mainImg = document.getElementById('mainImg');
+      if (mainImg) {
+        const imgUrl = fixImageUrl(p.image_url);
+        mainImg.src = imgUrl;
+        mainImg.onerror = () => {
+          mainImg.src = 'https://placehold.co/600x800?text=No+Image';
+        };
+      }
+
+      // ── Thumbnails — update all 4 to the same image (only 1 image per product) ──
+      document.querySelectorAll('#thumbs img').forEach(img => {
+        const imgUrl = fixImageUrl(p.image_url);
+        img.src = imgUrl;
+        img.onerror = () => { img.src = 'https://placehold.co/120x120?text=N/A'; };
+      });
+
+      // Also fix thumbnail onclick URLs
+      document.querySelectorAll('#thumbs > div').forEach(div => {
+        const imgUrl = fixImageUrl(p.image_url);
+        div.setAttribute('onclick', `setMain(this, '${imgUrl}')`);
+      });
+
+      // ── Colour / product type tags ──
+      if (p.colour) {
+        document.querySelectorAll('[data-colour], .colour-tag').forEach(el => el.textContent = p.colour);
+      }
+
+      // ── Similar items ──
+      if (data.similar && data.similar.length) {
+        const simGrid = document.getElementById('similarGrid');
+        if (simGrid) {
+          simGrid.innerHTML = data.similar.map(s => renderProductCard(s)).join('');
+        }
+      }
+
+      // ── Breadcrumb ──
+      const breadcrumbs = document.querySelectorAll('nav a, nav span');
+      const lastCrumb   = breadcrumbs[breadcrumbs.length - 1];
+      if (lastCrumb && p.name) lastCrumb.textContent = p.name.slice(0, 35);
+
+      // ── Page title ──
+      document.title = (p.name || 'Product') + ' — AI Fashion';
+
+    } catch(err) {
+      console.warn('Product load failed:', err.message);
+      // Keep static demo content visible
+    }
+  });
+
+  // ── UI interactions ──────────────────────────────────────────────────────
+  function setMain(thumb, url) {
+    document.getElementById('mainImg').src = url;
+    document.querySelectorAll('#thumbs > div').forEach(t => {
+      t.className = t.className.replace('ring-2 ring-primary', '').replace('opacity-60','') + ' opacity-60';
+    });
+    thumb.className = thumb.className.replace('opacity-60', '') + ' ring-2 ring-primary';
+  }
+
+  function rateProduct(type) {
+    const msg = document.getElementById('ratingMsg');
+    msg.classList.remove('hidden');
+    if (type === 'match') {
+      msg.textContent = '✓ Thanks! Your feedback improves our AI recommendations.';
+      msg.className = 'text-xs font-semibold text-green-600 mt-2 text-center';
+      document.getElementById('btn-match').querySelector('div').classList.add('border-green-500','bg-green-50');
+    } else {
+      msg.textContent = '✗ Got it! We\'ll refine future suggestions for you.';
+      msg.className = 'text-xs font-semibold text-red-500 mt-2 text-center';
+      document.getElementById('btn-nomatch').querySelector('div').classList.add('border-red-500','bg-red-50');
+    }
+  }
+
+  function saveItem() {
+    // Persist to wardrobe in localStorage
+    const params = new URLSearchParams(window.location.search);
+    const id     = params.get('id');
+    if (id) {
+      const wardrobe = JSON.parse(localStorage.getItem('fashionai_wardrobe') || '[]');
+      if (!wardrobe.includes(Number(id))) {
+        wardrobe.push(Number(id));
+        localStorage.setItem('fashionai_wardrobe', JSON.stringify(wardrobe));
+      }
+    }
+    const msg = document.getElementById('ratingMsg');
+    msg.classList.remove('hidden');
+    msg.textContent = '✓ Saved to your wardrobe!';
+    msg.className = 'text-xs font-semibold text-primary mt-2 text-center';
+    document.getElementById('btn-save').querySelector('div').classList.add('border-primary','bg-primary/10');
+    setTimeout(() => { window.location.href = 'my_wardrobe.html'; }, 1200);
+  }
+</script>
+</body></html>

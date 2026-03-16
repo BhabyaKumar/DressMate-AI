@@ -1,0 +1,10 @@
+venv310/
+__pycache__/
+*.pyc
+.env
+backend/Images/
+venv/
+node_modules/
+dist/
+build/
+*.log

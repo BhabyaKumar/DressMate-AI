@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#994ce6",
+          "background-light": "#f7f6f8",
+          "background-dark": "#191121",
+        },
+        fontFamily: { "display": ["Inter", "sans-serif"] },
+        borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<title>FashionAI - Intelligent Recommendations</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-primary/10 bg-white/80 backdrop-blur-md px-6 md:px-20 py-4 sticky top-0 z-50">
+  <div class="flex items-center gap-2 text-primary">
+    <span class="material-symbols-outlined text-3xl">auto_awesome</span>
+    <h2 class="text-slate-900 text-xl font-bold leading-tight tracking-tight">DressMate</h2>
+  </div>
+  <div class="hidden md:flex flex-1 justify-center gap-8">
+    <a class="text-primary text-sm font-bold border-b-2 border-primary pb-1 transition-colors" href="index.html">Home</a>
+    <a class="text-slate-700 hover:text-primary text-sm font-semibold transition-colors" href="image_upload_page.html">Upload</a>
+    <a class="text-slate-700 hover:text-primary text-sm font-semibold transition-colors" href="browse_products.html">Browse</a>
+    <a class="text-slate-700 hover:text-primary text-sm font-semibold transition-colors" href="my_wardrobe.html">My Wardrobe</a>
+    <a class="text-slate-700 hover:text-primary text-sm font-semibold transition-colors" href="gemini_stylist.html">AI Stylist</a>
+  </div>
+  <div class="flex items-center gap-4">
+    <button onclick="document.querySelector('#mobile-menu').classList.toggle('hidden')" class="md:hidden flex items-center justify-center rounded-full size-10 text-slate-500 hover:bg-slate-100 transition-colors">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <button class="flex items-center justify-center rounded-full size-10 text-slate-500 hover:bg-slate-100 transition-colors">
+      <span class="material-symbols-outlined">search</span>
+    </button>
+    <div class="h-6 w-px bg-slate-200"></div>
+    <button onclick="alert('Sign In coming soon!')" class="flex min-w-[100px] cursor-pointer items-center justify-center rounded-full h-10 px-6 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
+      Sign In
+    </button>
+  </div>
+</header>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-b border-primary/10 px-6 py-4 flex flex-col gap-3">
+  <a class="text-primary font-bold text-sm" href="index.html">Home</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-semibold" href="image_upload_page.html">Upload</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-semibold" href="browse_products.html">Browse</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-semibold" href="my_wardrobe.html">My Wardrobe</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-semibold" href="gemini_stylist.html">AI Stylist</a>
+</div>
+
+<main class="flex-1">
+  <!-- Hero Section -->
+  <div class="max-w-7xl mx-auto px-6 py-12 md:py-24">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div class="flex flex-col gap-8 order-2 lg:order-1">
+        <div class="flex flex-col gap-4">
+          <span class="bg-primary/10 text-primary font-bold text-xs uppercase tracking-widest px-3 py-1 rounded-full w-fit">Next Gen Style</span>
+          <h1 class="text-slate-900 text-5xl md:text-7xl font-black leading-[1.1] tracking-tight">
+            DressMate <span class="text-primary">Recommendation</span> System
+          </h1>
+          <p class="text-slate-600 text-lg md:text-xl max-w-lg leading-relaxed">
+            Upload a clothing item and discover visually similar styles instantly. Powered by advanced computer vision.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-4">
+          <a href="image_upload_page.html" class="flex min-w-[200px] cursor-pointer items-center justify-center rounded-xl h-14 px-8 bg-primary text-white text-lg font-bold shadow-xl shadow-primary/30 hover:scale-[1.02] transition-transform">
+            <span class="material-symbols-outlined mr-2">upload_file</span>
+            Upload Fashion Image
+          </a>
+          <a href="browse_products.html" class="flex min-w-[200px] cursor-pointer items-center justify-center rounded-xl h-14 px-8 bg-white border-2 border-primary/20 text-primary text-lg font-bold hover:bg-primary/5 transition-colors">
+            Try Demo
+          </a>
+        </div>
+        
+      </div>
+      <div class="relative order-1 lg:order-2">
+        <div class="absolute -inset-4 bg-primary/10 rounded-[2.5rem] blur-2xl -z-10"></div>
+        <div class="w-full aspect-[4/5] bg-center bg-cover rounded-[2rem] shadow-2xl overflow-hidden border-8 border-white" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAO4aPKsSCh3NvGOC9sEHIqrI_w50VJmEy6JI2-8d5iO6cpBGCUFz6TsM_OFPuor-jSqfmXAxmG87PFk-Givy7fR8gr9h9VUUmoDTxIm8U1aE5CmMyjF7YRCFTcCImfsyebPkVWuNJhWDgXwCJkAUfSKd7ozW7nqxk9QT_wDD7gjPjvYeSFW2eu-CiB9M5hBF6WVPY5Ak2V_Iz8nE_yItSJ39Ows53XtcZv5c1dtu8HWSrTkOekPHMp3E19BDRLBaMhQ1xeSad3IMM");'>
+          <div class="absolute bottom-6 right-6 bg-white/90 backdrop-blur px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3">
+            <div class="size-10 bg-primary/20 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-primary">search_check</span>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-900">Scanning Style...</p>
+              <p class="text-[10px] text-slate-500">Processing pattern &amp; color</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured Recommendations Section -->
+  <section class="bg-white py-20">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex items-end justify-between mb-12">
+        <div class="flex flex-col gap-2">
+          <h2 class="text-slate-900 text-3xl font-bold tracking-tight">Featured Recommendations</h2>
+          <p class="text-slate-500">Hand-picked by our AI for your unique aesthetic</p>
+        </div>
+        <a class="text-primary font-bold flex items-center gap-1 hover:underline" href="browse_products.html">
+          View all products <span class="material-symbols-outlined">chevron_right</span>
+        </a>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Card 1 -->
+        <div class="group flex flex-col gap-4 cursor-pointer" onclick="location.href='product_detail.html'">
+          <div class="relative w-full aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden shadow-sm group-hover:shadow-xl transition-all duration-300">
+            <div class="absolute inset-0 bg-center bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD8EPrql95wqQUcxXCd-v56HT_Y6lnv99PkSTrkr9BmRnt18mhM0el1bsKXP_HsWlznH90qk5Z5lF5dIrAHHA-qPbrPMY0nkH57uQjsQlpSt8EXw7pBQ9UBTnAHm4XrMKnLOXbWI6Fce5xQByZrYkr1hGGtsu_7IGg_lhPFyvy0Y7N0CVo-raCzNckUMCN9tKU6FxfEbvBU2MZTlHTCOWZQA83Xz7_28qzJgqy4eJxX8mV0c3C0F2La198EMeFweKAny5-FzbkvkO4");'></div>
+            <button class="absolute top-4 right-4 size-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500" onclick="event.stopPropagation(); this.querySelector('span').textContent='favorite'; this.classList.add('text-red-500')">
+              <span class="material-symbols-outlined text-xl">favorite</span>
+            </button>
+            <div class="absolute bottom-4 left-4">
+              <span class="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-primary">98% Match</span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-slate-900 text-lg font-bold group-hover:text-primary transition-colors">Pastel Summer Dress</h3>
+              <p class="text-slate-500 text-sm">Collection 2024</p>
+            </div>
+            <div class="flex items-center gap-1">
+              <button class="size-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-green-600 hover:bg-green-50 transition-colors" onclick="event.stopPropagation()">
+                <span class="material-symbols-outlined text-lg">thumb_up</span>
+              </button>
+              <button class="size-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" onclick="event.stopPropagation()">
+                <span class="material-symbols-outlined text-lg">thumb_down</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="group flex flex-col gap-4 cursor-pointer" onclick="location.href='product_detail.html'">
+          <div class="relative w-full aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden shadow-sm group-hover:shadow-xl transition-all duration-300">
+            <div class="absolute inset-0 bg-center bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDufG-4RW1Dr-RIcbhSPnqi2zzDjU8iJ159cpnixpJx5Dn1mr5zxzLCg4T0npd1zB12b8wNpdntx-Ix6N_FGrlIWhsIc3URZiSEvLy2Zr3qQIUP3LMNzCs4HN3wVw2vL9E7sxwl0l99SQ0lmkPsUBHG9eXD2mhLW3njA3yEjb-fLqqVbSmzndroSJp-1NP1Kzb0uGnz_DLMPUspOykF_-STWfyGJRQyc_FRiIUPMzCA7BNulzTY4H06H0pGC0xAfSIGUOjnHcB1isw");'></div>
+            <button class="absolute top-4 right-4 size-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500" onclick="event.stopPropagation()">
+              <span class="material-symbols-outlined text-xl">favorite</span>
+            </button>
+            <div class="absolute bottom-4 left-4">
+              <span class="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-primary">92% Match</span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-slate-900 text-lg font-bold group-hover:text-primary transition-colors">Modern Denim Jacket</h3>
+              <p class="text-slate-500 text-sm">Vintage Wash</p>
+            </div>
+            <div class="flex items-center gap-1">
+              <button class="size-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-green-600 hover:bg-green-50 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+              <button class="size-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+            </div>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="group flex flex-col gap-4 cursor-pointer" onclick="location.href='product_detail.html'">
+          <div class="relative w-full aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden shadow-sm group-hover:shadow-xl transition-all duration-300">
+            <div class="absolute inset-0 bg-center bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuADSSCvolqw3mjkLRVx25M5XLrhSepCxfwwt1HQBoZGPDGBs0X0UWIiyobT5sMHY_CE-Xovmj5WttkoHttGZHgNBWpTpfOSWshMCt3mGRC5XM1t-zRE3pjzKNftTSyWlEBwkesg1Xmx_RCVCIi7zqYIJP05U7kvAuRT6Vh988nZPcaLFJsQdr2KDe57sC5lNSYhH9iEEisSxHH_lk4kD2avx5tuYgxKhYUz3bXj6PPcTYiYFIIpVYM96jZXigd9lHzX6XiyOi_WB_k");'></div>
+            <button class="absolute top-4 right-4 size-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500" onclick="event.stopPropagation()">
+              <span class="material-symbols-outlined text-xl">favorite</span>
+            </button>
+            <div class="absolute bottom-4 left-4">
+              <span class="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-primary">85% Match</span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-slate-900 text-lg font-bold group-hover:text-primary transition-colors">Classic Sneakers</h3>
+              <p class="text-slate-500 text-sm">Minimalist White</p>
+            </div>
+            <div class="flex items-center gap-1">
+              <button class="size-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-green-600 hover:bg-green-50 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+              <button class="size-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+            </div>
+          </div>
+        </div>
+        <!-- Card 4 -->
+        <div class="group flex flex-col gap-4 cursor-pointer" onclick="location.href='product_detail.html'">
+          <div class="relative w-full aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden shadow-sm group-hover:shadow-xl transition-all duration-300">
+            <div class="absolute inset-0 bg-center bg-cover" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCz6ped-OpdiiUnRKlKpig_1gpPQerJfCXxR3dwKiDc3r_NHBFX3EKikiVeMX-Sl9DMqVK6kVuLnpqxpHakv1DDDEPMKCzBW5ZpkVYQYk2PrsyexOeRBJwGPhiLiylAs1RTK9cgdmjSC-G9N0tfQpv31PXkH36ljF183FuW8z-cuQ-qdKCznI1L0yhlhViAdCS6bSf5uTF-VpxReFLRxnSV2ba5CGE1GDjFM1WrHTNBOVyytrDtp2I0hM1DPLPH9sr4KxIacV3DVk0");'></div>
+            <button class="absolute top-4 right-4 size-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500" onclick="event.stopPropagation()">
+              <span class="material-symbols-outlined text-xl">favorite</span>
+            </button>
+            <div class="absolute bottom-4 left-4">
+              <span class="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-primary">95% Match</span>
+            </div>
+          </div>
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-slate-900 text-lg font-bold group-hover:text-primary transition-colors">Silk Midi Skirt</h3>
+              <p class="text-slate-500 text-sm">Evening Satin</p>
+            </div>
+            <div class="flex items-center gap-1">
+              <button class="size-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-green-600 hover:bg-green-50 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+              <button class="size-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="max-w-7xl mx-auto px-6 py-20">
+    <div class="bg-primary rounded-[3rem] px-8 py-16 md:py-24 flex flex-col items-center text-center text-white relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+        <svg class="w-full h-full fill-white" viewBox="0 0 100 100"><circle cx="10" cy="10" r="20"></circle><circle cx="90" cy="90" r="30"></circle><circle cx="50" cy="50" r="10"></circle></svg>
+      </div>
+      <div class="relative z-10 flex flex-col items-center gap-6 max-w-2xl">
+        <h2 class="text-4xl md:text-5xl font-black tracking-tight leading-tight">Ready to find your <span class="text-slate-900">perfect</span> style?</h2>
+        <p class="text-white/80 text-lg">Join thousands of users finding their unique look with the power of artificial intelligence. It's free to get started.</p>
+        <a href="image_upload_page.html" class="mt-4 flex min-w-[240px] cursor-pointer items-center justify-center rounded-xl h-14 px-10 bg-white text-primary text-lg font-bold shadow-2xl hover:bg-slate-50 transition-colors">
+          Get Started Now
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer class="bg-white border-t border-primary/10 py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+      <div class="col-span-1 flex flex-col gap-4">
+        <div class="flex items-center gap-2 text-primary">
+          <span class="material-symbols-outlined text-3xl">auto_awesome</span>
+          <h2 class="text-slate-900 text-xl font-bold leading-tight tracking-tight">DressMate</h2>
+        </div>
+        <p class="text-slate-500 text-sm leading-relaxed">Personalized style recommendations powered by cutting-edge neural networks.</p>
+      </div>
+      <div>
+        <h4 class="text-slate-900 font-bold mb-6">Explore</h4>
+        <ul class="flex flex-col gap-3 text-sm text-slate-500">
+          <li><a class="hover:text-primary" href="browse_products.html">Featured Collections</a></li>
+          <li><a class="hover:text-primary" href="browse_products.html">New Arrivals</a></li>
+          <li><a class="hover:text-primary" href="image_upload_page.html">Visual Search</a></li>
+          <li><a class="hover:text-primary" href="browse_products.html">Style Trends</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-slate-900 font-bold mb-6">Company</h4>
+        <ul class="flex flex-col gap-3 text-sm text-slate-500">
+          <li><a class="hover:text-primary" href="#">About Us</a></li>
+          <li><a class="hover:text-primary" href="#">Careers</a></li>
+          <li><a class="hover:text-primary" href="#">Press Kit</a></li>
+          <li><a class="hover:text-primary" href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-slate-900 font-bold mb-6">Support</h4>
+        <ul class="flex flex-col gap-3 text-sm text-slate-500">
+          <li><a class="hover:text-primary" href="#">Help Center</a></li>
+          <li><a class="hover:text-primary" href="#">API Documentation</a></li>
+          <li><a class="hover:text-primary" href="#">Privacy Policy</a></li>
+          <li><a class="hover:text-primary" href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-primary/5 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400 font-medium uppercase tracking-widest">
+      <p>© 2024 FashionAI Inc. All rights reserved.</p>
+      <p>Designed for the future of fashion</p>
+    </div>
+  </div>
+</footer>
+
+</div>
+</div>
+
+<script src="api.js"></script>
+</body></html>

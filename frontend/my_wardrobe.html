@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Wardrobe - FashionAI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: { "primary": "#994ce6", "background-light": "#f7f6f8", "background-dark": "#191121" },
+        fontFamily: { "display": ["Inter"] },
+        borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-background-light text-slate-900 min-h-screen">
+<div class="layout-container flex h-full flex-col">
+
+<!-- Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-primary/10 bg-white px-6 md:px-10 py-3 sticky top-0 z-50">
+  <div class="flex items-center gap-8">
+    <a href="index.html" class="flex items-center gap-2 text-primary">
+      <span class="material-symbols-outlined text-3xl">auto_awesome</span>
+      <h2 class="text-slate-900 text-lg font-bold leading-tight tracking-tight">DressMate</h2>
+    </a>
+    <nav class="hidden md:flex items-center gap-8">
+      <a class="text-slate-600 text-sm font-medium hover:text-primary transition-colors" href="index.html">Home</a>
+      <a class="text-slate-600 text-sm font-medium hover:text-primary transition-colors" href="image_upload_page.html">Upload</a>
+      <a class="text-slate-600 text-sm font-medium hover:text-primary transition-colors" href="browse_products.html">Browse</a>
+      <a class="text-primary text-sm font-bold border-b-2 border-primary pb-1" href="my_wardrobe.html">My Wardrobe</a>
+      <a class="text-slate-600 text-sm font-medium hover:text-primary transition-colors" href="gemini_stylist.html">AI Stylist</a>
+    </nav>
+  </div>
+  <div class="flex flex-1 justify-end gap-4 items-center">
+    <div class="hidden sm:flex flex-col min-w-40 h-10 max-w-64">
+      <div class="flex w-full flex-1 items-stretch rounded-xl h-full bg-primary/5 border border-primary/10">
+        <div class="text-primary/60 flex items-center justify-center pl-4"><span class="material-symbols-outlined text-xl">search</span></div>
+        <input class="flex w-full min-w-0 flex-1 border-none bg-transparent focus:outline-0 focus:ring-0 h-full placeholder:text-slate-400 text-sm" placeholder="Search saved items"/>
+      </div>
+    </div>
+    <div class="bg-primary/20 rounded-full p-1 border border-primary/10 cursor-pointer">
+      <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCmcNqJVo6J8qSVE-WifA4m9DYgAHIH6d9cZvWBKL0Ht3l9Sn3WM0Dxq-IgUtpquCkiM1BUXdOPNDwX6qpqcmhV0tSjHJwgAVjm3J8hRCIL0oqZMOsraxZcdfjkxacZHMHYILRi0gyFN566ANKUbUPTAs9L09Jbi6Be53F7ACpwvrEabw3-zc6vSNUSskx926K4zyyOaqNcTF_gNr1mb5xpQW4kHszGp-Qn8b6Vx6Cvy7v83fe_1sW1t2MHjN9UIFeLuk8wnP0K2fo");'></div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-[1200px] mx-auto w-full px-6 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-slate-900 text-4xl font-black leading-tight tracking-tight mb-2">My Wardrobe</h1>
+    <p class="text-slate-500 text-lg">Your curated collection of AI-recommended styles.</p>
+    <div class="relative inline-block mt-4">
+      <button class="flex h-10 items-center justify-center gap-x-2 rounded-xl bg-primary text-white px-6 shadow-md shadow-primary/20 hover:bg-primary/90 transition-all" id="share-wardrobe-btn">
+        <span class="material-symbols-outlined text-xl">share</span>
+        <span class="text-sm font-semibold">Share Wardrobe</span>
+      </button>
+      <div class="absolute left-0 mt-2 w-48 bg-white rounded-xl border border-slate-200 shadow-xl z-10 hidden" id="share-dropdown">
+        <div class="p-1">
+          <button onclick="copyLink()" class="flex w-full items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"><span class="material-symbols-outlined text-lg">link</span>Copy Link</button>
+          <button onclick="alert('Sharing to Twitter!')" class="flex w-full items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"><span class="material-symbols-outlined text-lg">share_reviews</span>Share to Twitter</button>
+          <button onclick="alert('Sharing to Pinterest!')" class="flex w-full items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"><span class="material-symbols-outlined text-lg">push_pin</span>Share to Pinterest</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+    <div class="flex gap-2 overflow-x-auto pb-2" id="filterTabs">
+      <button onclick="filterItems('all', this)" class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-primary text-white px-5 shadow-sm shadow-primary/20 text-sm font-semibold">All Items</button>
+      <button onclick="filterItems('dresses', this)" class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-white border border-slate-200 px-5 text-slate-700 hover:bg-slate-50 text-sm font-medium">Dresses</button>
+      <button onclick="filterItems('shoes', this)" class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-white border border-slate-200 px-5 text-slate-700 hover:bg-slate-50 text-sm font-medium">Shoes</button>
+      <button onclick="filterItems('accessories', this)" class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-white border border-slate-200 px-5 text-slate-700 hover:bg-slate-50 text-sm font-medium">Accessories</button>
+    </div>
+    <div class="flex gap-2">
+      <div class="relative">
+        <button onclick="document.getElementById('sortDropdown').classList.toggle('hidden')" class="flex h-10 items-center justify-center gap-x-2 rounded-xl bg-white border border-slate-200 px-4 text-slate-700">
+          <span class="material-symbols-outlined text-lg">sort</span>
+          <span class="text-sm font-medium" id="sortLabelWard">Recently Saved</span>
+          <span class="material-symbols-outlined text-lg">expand_more</span>
+        </button>
+        <div id="sortDropdown" class="hidden absolute right-0 top-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl z-10 min-w-[160px]">
+          <button onclick="setSortWard('Recently Saved')" class="block w-full text-left px-4 py-2 text-sm hover:bg-primary/5">Recently Saved</button>
+          <button onclick="setSortWard('Highest Match')" class="block w-full text-left px-4 py-2 text-sm hover:bg-primary/5">Highest Match</button>
+          <button onclick="setSortWard('A-Z')" class="block w-full text-left px-4 py-2 text-sm hover:bg-primary/5">A–Z</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wardrobe Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="wardrobeGrid">
+
+    <!-- Item 1 -->
+    <div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer" data-cat="dresses" onclick="location.href='product_detail.html'">
+      <div class="relative w-full aspect-[3/4] bg-slate-100 overflow-hidden">
+        <div class="w-full h-full bg-center bg-cover transition-transform duration-500 group-hover:scale-105" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDL7Z2Z8srv_5485FPQiPDyXQ-d-bKMu4JL63qYVuA9IQKssjZWHzKQ7XMBxOga31TcU9IWtND-DJZJ89tUIKHF0UP_6JdDzyNjg2IPfI3WPIjoZaMkBiDx0Yd5qf3y79gmPaIFQQvdKGuDTr4sIK-CdwHbH3AiFBJlIaZs02pyn7xBj4nh7OUc1vd7qBucqDEtE0DoJ28M5LPEHkonY-hkazV0NtINp2-oIBHG3skAUpp7i9tN1a_IWidyluMpCihZjQ1GYo4uzdM");'></div>
+        <button class="absolute top-3 right-3 bg-white/90 backdrop-blur rounded-full p-2 text-primary hover:bg-primary hover:text-white transition-colors" onclick="event.stopPropagation()">
+          <span class="material-symbols-outlined text-xl">favorite</span>
+        </button>
+        <div class="absolute bottom-3 left-3 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+          <p class="text-white text-xs font-medium">AI Match: 98%</p>
+        </div>
+      </div>
+      <div class="p-4 flex flex-col gap-3">
+        <div class="flex justify-between items-start">
+          <div><h3 class="font-bold">Silk Midi Dress</h3><p class="text-slate-500 text-sm italic">Summer Collection</p></div>
+          <div class="flex gap-1">
+            <button class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+            <button class="size-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item 2 -->
+    <div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer" data-cat="shoes" onclick="location.href='product_detail.html'">
+      <div class="relative w-full aspect-[3/4] bg-slate-100 overflow-hidden">
+        <div class="w-full h-full bg-center bg-cover transition-transform duration-500 group-hover:scale-105" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD23XgiWyEe3RbQDfUYkANrKqO6kaleFb5sZr_RU6ylv9u86rLHiTIhMkX4fNXJ2drybzgiEL-BvfS4THXAZ6Wbq-itPO4v4rbYyqRAAhAzVdiTpY7rtShrYX3d65QZAcGQ2x29OaPAeRFiAJJjgbjA-qrJ5OGa_BGFJdheEIeoq1Dg9Ou1icz2cQ8cFktU7YHsC-PgRZpOvqiDZ2EK04G7GrjWw6EirnmIE3I7GzaFYg-RedcG5TXqJXaU1g88dZPDhUzDnHe1HAY");'></div>
+        <button class="absolute top-3 right-3 bg-white/90 backdrop-blur rounded-full p-2 text-primary" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-xl">favorite</span></button>
+        <div class="absolute bottom-3 left-3 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20"><p class="text-white text-xs font-medium">AI Match: 92%</p></div>
+      </div>
+      <div class="p-4 flex flex-col gap-3">
+        <div class="flex justify-between items-start">
+          <div><h3 class="font-bold">Leather Ankle Boots</h3><p class="text-slate-500 text-sm italic">Footwear</p></div>
+          <div class="flex gap-1">
+            <button class="size-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+            <button class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item 3 -->
+    <div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer" data-cat="dresses" onclick="location.href='product_detail.html'">
+      <div class="relative w-full aspect-[3/4] bg-slate-100 overflow-hidden">
+        <div class="w-full h-full bg-center bg-cover transition-transform duration-500 group-hover:scale-105" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCYHa1e0KbuWHtq0nygN1Mss-yTZ2EZxvMXcKacPie0eNNVNnINYyDL0wazSi6azLi4IWJ_zY-5WlxkUzBFXbyjsgmSIf8HlJ872E8U3uvAr-xTwx9PDDudkPlJfOEuGm0mcwaJmbvVAfalDN7xsEs-ckAKQqY36IK6ADK0QLpfp_297ORyJ6hZDCLsBq1mO04f40Oa86Q5DUvg8V_brnrztAQtlnzVUO9XCg_Q2-gOfpUOc7bcZ5kOe8jPY7owzPPLXUgM3sSpxRo");'></div>
+        <button class="absolute top-3 right-3 bg-white/90 backdrop-blur rounded-full p-2 text-primary" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-xl">favorite</span></button>
+        <div class="absolute bottom-3 left-3 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20"><p class="text-white text-xs font-medium">AI Match: 85%</p></div>
+      </div>
+      <div class="p-4 flex flex-col gap-3">
+        <div class="flex justify-between items-start">
+          <div><h3 class="font-bold">Denim Jacket</h3><p class="text-slate-500 text-sm italic">Wardrobe Essential</p></div>
+          <div class="flex gap-1">
+            <button class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+            <button class="size-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item 4 -->
+    <div class="group flex flex-col bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer" data-cat="accessories" onclick="location.href='product_detail.html'">
+      <div class="relative w-full aspect-[3/4] bg-slate-100 overflow-hidden">
+        <div class="w-full h-full bg-center bg-cover transition-transform duration-500 group-hover:scale-105" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG1jEIvnqslFWyyxKuH_snPz6XKn2V56KMyOwt0Y1MQTP92KfAcXfp-xMppgsPo2aDbOPLZVnxMAqAdxVeYJ1gofjSGmzBqO2XMpa8raafh0c8dS8iFt-Ch-LqMRmMeH3sO-kFsoXIIW9goSDC7N7WCVBqvAMX7T-VyiYXLXWiy-qUCZe0fD5rNx6681bqI2XBRYIoXYig456GIg9cqepKyPVzvBUKOGnMgPGgwdUUp4HEiZTN4idC2vxaV58NBAC6HtnkhDSyjpE");'></div>
+        <button class="absolute top-3 right-3 bg-white/90 backdrop-blur rounded-full p-2 text-primary" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-xl">favorite</span></button>
+        <div class="absolute bottom-3 left-3 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20"><p class="text-white text-xs font-medium">AI Match: 78%</p></div>
+      </div>
+      <div class="p-4 flex flex-col gap-3">
+        <div class="flex justify-between items-start">
+          <div><h3 class="font-bold">Minimal Case</h3><p class="text-slate-500 text-sm italic">Accessories</p></div>
+          <div class="flex gap-1">
+            <button class="size-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_up</span></button>
+            <button class="size-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center" onclick="event.stopPropagation()"><span class="material-symbols-outlined text-lg">thumb_down</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Explore CTA -->
+  <div class="mt-12 text-center">
+    <p class="text-slate-500 mb-4">Discover more styles for your wardrobe</p>
+    <a href="browse_products.html" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-primary/30 transition-all">
+      <span class="material-symbols-outlined">explore</span>
+      Explore More Styles
+    </a>
+  </div>
+</main>
+
+<footer class="mt-auto border-t border-primary/5 py-8 text-center text-slate-400 text-sm">
+  <p>© 2024 FashionAI Assistant. Powered by your unique style.</p>
+</footer>
+
+</div>
+<script src="api.js"></script>
+<script>
+  document.getElementById('share-wardrobe-btn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.getElementById('share-dropdown').classList.toggle('hidden');
+  });
+  window.addEventListener('click', function() {
+    document.getElementById('share-dropdown').classList.add('hidden');
+  });
+
+  // ── Load saved wardrobe items from localStorage + backend ───────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    const wardrobeIds = JSON.parse(localStorage.getItem('fashionai_wardrobe') || '[]');
+    const grid = document.getElementById('wardrobeGrid');
+    if (!grid) return;
+
+    if (wardrobeIds.length === 0) {
+      // No saved items — show empty state without wiping static demo content
+      // (keep static items visible as demo)
+      return;
+    }
+
+    showSkeleton(grid, wardrobeIds.length);
+
+    const products = [];
+    for (const id of wardrobeIds) {
+      try {
+        const data = await API.getProduct(id);
+        if (data.product) products.push(data.product);
+      } catch(e) { /* skip missing */ }
+    }
+
+    if (products.length) {
+      grid.innerHTML = products.map(p => `
+        <div class="group relative flex flex-col overflow-hidden rounded-xl bg-white border border-slate-100
+                    hover:shadow-xl transition-all duration-300 cursor-pointer"
+             data-cat="${p.product_type || 'other'}"
+             onclick="window.location='product_detail.html?id=${p.id}'">
+          <div class="relative aspect-[3/4] overflow-hidden">
+            <img class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                 src="${p.image_url || 'https://placehold.co/400x500?text=No+Image'}"
+                 onerror="this.src='https://placehold.co/400x500?text=No+Image'" alt="${p.name}"/>
+            <button onclick="event.stopPropagation(); removeFromWardrobe(this, ${p.id})"
+                    class="absolute top-3 right-3 p-2 rounded-full bg-white/90 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors shadow">
+              <span class="material-symbols-outlined text-lg">delete</span>
+            </button>
+          </div>
+          <div class="p-4 flex flex-col gap-1">
+            ${p.brand ? `<p class="text-xs text-primary font-bold uppercase tracking-wide">${p.brand}</p>` : ''}
+            <h3 class="text-sm font-semibold text-slate-800 line-clamp-2">${p.name}</h3>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-sm font-bold">${p.price ? '₹' + p.price : ''}</span>
+              <span class="text-xs text-slate-400 capitalize">${p.colour || ''}</span>
+            </div>
+          </div>
+        </div>`).join('');
+
+      // Update count
+      const countEl = document.querySelector('[data-wardrobe-count]') ||
+                      document.querySelector('h1 + p, h2 + p');
+      if (countEl) countEl.textContent = products.length + ' items';
+    }
+  });
+
+  function removeFromWardrobe(btn, id) {
+    const saved = JSON.parse(localStorage.getItem('fashionai_wardrobe') || '[]');
+    localStorage.setItem('fashionai_wardrobe', JSON.stringify(saved.filter(x => x !== id)));
+    btn.closest('[data-cat]')?.remove();
+  }
+
+  function filterItems(cat, btn) {
+    document.querySelectorAll('#filterTabs button').forEach(b => {
+      b.className = 'flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-white border border-slate-200 px-5 text-slate-700 hover:bg-slate-50 text-sm font-medium';
+    });
+    btn.className = 'flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-xl bg-primary text-white px-5 shadow-sm shadow-primary/20 text-sm font-semibold';
+    document.querySelectorAll('#wardrobeGrid > div').forEach(item => {
+      item.style.display = (cat === 'all' || item.dataset.cat === cat) ? '' : 'none';
+    });
+  }
+
+  function setSortWard(label) {
+    document.getElementById('sortLabelWard').textContent = label;
+    document.getElementById('sortDropdown').classList.add('hidden');
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied to clipboard!'));
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('[onclick*="sortDropdown"]') && !e.target.closest('#sortDropdown')) {
+      document.getElementById('sortDropdown').classList.add('hidden');
+    }
+  });
+</script>
+</body></html>
