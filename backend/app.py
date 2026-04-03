@@ -1,17 +1,16 @@
 """
-FashionAI Backend - FastAPI Server
-===================================
-Integrates all backend modules into a REST API for the frontend.
+FashionAI Backend - FastAPI Server with MongoDB
+===============================================
+Integrates all backend modules into a REST API using MongoDB for data persistence.
 
 Setup:
   pip install fastapi uvicorn python-multipart scikit-learn numpy pandas
-              pillow opencv-python-headless tensorflow
+              pillow opencv-python-headless tensorflow pymongo python-dotenv
 
 Run:
-  uvicorn app:app --reload --port 8000
+  python -m uvicorn app:app --reload --port 8000
 
-Then open the frontend HTML files (served via any static file server or
-just opened from the file system). The API base URL is http://localhost:8000
+Then open the frontend HTML files. The API base URL is http://localhost:8000
 """
 
 import os
@@ -22,9 +21,9 @@ import tempfile
 import traceback
 from pathlib import Path
 from typing import Optional, List
+from datetime import datetime
 
 import numpy as np
-import pandas as pd
 import cv2
 from PIL import Image
 from sklearn.metrics.pairwise import cosine_similarity
@@ -34,34 +33,22 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+# MongoDB imports
+from database import (
+    connect_to_mongodb,
+    close_mongodb,
+    get_all_products,
+    get_product_by_id,
+    search_products,
+)
+
 # ── paths ──────────────────────────────────────────────────────────────────
 BASE_DIR   = Path(__file__).parent
-DATA_DIR   = BASE_DIR / "data"
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-DATA_PATH  = DATA_DIR / "fashion_with_clusters.csv"
-EMB_PATH   = DATA_DIR / "fashion_embeddings.npy"
-
 # ── lazy-load heavy assets ─────────────────────────────────────────────────
-_df         = None
-_embeddings = None
 _resnet     = None
-
-def get_data():
-    global _df, _embeddings
-    if _df is None:
-        if not DATA_PATH.exists():
-            raise HTTPException(500, f"Dataset not found at {DATA_PATH}. "
-                                     "Run generate_embeddings.py and cluster_embeddings.py first.")
-        _df = pd.read_csv(DATA_PATH)
-        _df = _df.fillna("")
-    if _embeddings is None:
-        if not EMB_PATH.exists():
-            raise HTTPException(500, f"Embeddings not found at {EMB_PATH}. "
-                                     "Run generate_embeddings.py first.")
-        _embeddings = np.load(EMB_PATH)
-    return _df, _embeddings
 
 
 def get_resnet():
@@ -87,10 +74,31 @@ def extract_features_from_array(img_array: np.ndarray) -> np.ndarray:
     return features.flatten()
 
 
-def find_similar_items(query_vector: np.ndarray, embeddings: np.ndarray, top_k: int = 8) -> np.ndarray:
-    similarities = cosine_similarity(query_vector.reshape(1, -1), embeddings)[0]
-    sorted_indices = np.argsort(similarities)[::-1]
-    return sorted_indices[:top_k], similarities[sorted_indices[:top_k]]
+def find_similar_items_mongo(query_vector: np.ndarray, top_k: int = 8) -> List[tuple]:
+    """
+    Find similar items by computing cosine similarity with all embeddings in MongoDB.
+    Returns list of (product_dict, similarity_score) tuples.
+    """
+    products = get_all_products(limit=50000)
+    
+    similarities = []
+    for product in products:
+        if "embedding" not in product:
+            continue
+        
+        try:
+            embedding = np.array(product["embedding"])
+            score = cosine_similarity(
+                query_vector.reshape(1, -1),
+                embedding.reshape(1, -1)
+            )[0][0]
+            similarities.append((product, float(score)))
+        except Exception:
+            continue
+    
+    # Sort by similarity and return top-k
+    similarities.sort(key=lambda x: x[1], reverse=True)
+    return similarities[:top_k]
 
 
 def detect_product_type(text: str) -> str:
@@ -160,9 +168,14 @@ def get_dominant_color_name(img_rgb: np.ndarray) -> str:
     return "other"
 
 
-def row_to_product(row, idx: int, score: float = 1.0) -> dict:
-    """Convert a DataFrame row to a product dict for the frontend."""
-    image_url = str(row.get("image_url", row.get("image_path", "")))
+def product_to_dict(product: dict, similarity: float = 1.0) -> dict:
+    """Convert a MongoDB product document to API response format."""
+    from bson.objectid import ObjectId
+    
+    # Extract ID
+    product_id = str(product.get("_id", ""))
+    
+    image_url = str(product.get("image_url", product.get("image_path", "")))
 
     if image_url and not image_url.startswith("http"):
         # Convert any local path like "Images\foo.jpg" or "Images/foo.jpg"
@@ -171,25 +184,25 @@ def row_to_product(row, idx: int, score: float = 1.0) -> dict:
         image_url = f"/images/{filename}"
 
     return {
-        "id":           int(idx),
-        "name":         str(row.get("name", "Fashion Item")),
-        "brand":        str(row.get("brand", "")),
-        "price":        str(row.get("price", row.get("selling_price", ""))),
-        "colour":       str(row.get("colour", row.get("image_color", ""))),
-        "product_type": str(row.get("product_type", "")),
-        "description":  str(row.get("description", "")),
+        "id":           product_id,
+        "name":         str(product.get("name", "Fashion Item")),
+        "brand":        str(product.get("brand", "")),
+        "price":        str(product.get("price", "")),
+        "colour":       str(product.get("colour", "")),
+        "product_type": str(product.get("product_type", "")),
+        "description":  str(product.get("description", "")),
         "image_url":    image_url,
-        "rating":       float(row.get("rating", 4.0) or 4.0),
-        "cluster":      int(row.get("cluster", 0) or 0),
-        "similarity":   round(float(score), 4),
+        "rating":       float(product.get("rating", 4.0) or 4.0),
+        "cluster":      int(product.get("cluster", 0) or 0),
+        "similarity":   round(float(similarity), 4),
     }
 
 
 # ── FastAPI app ────────────────────────────────────────────────────────────
 app = FastAPI(
     title="FashionAI API",
-    description="Backend for the AI Fashion Recommendation Frontend",
-    version="1.0.0",
+    description="Backend for the AI Fashion Recommendation Frontend (MongoDB Version)",
+    version="2.0.0",
 )
 
 app.add_middleware(
@@ -201,7 +214,6 @@ app.add_middleware(
 )
 
 # ── Serve local Images folder as static files ──────────────────────────────
-# Checks common image folder locations relative to backend/
 for _img_dir in ["Images", "images", "data/Images", "data/images"]:
     _img_path = BASE_DIR / _img_dir
     if _img_path.exists():
@@ -210,11 +222,29 @@ for _img_dir in ["Images", "images", "data/Images", "data/images"]:
         break
 
 
+# ── Startup / Shutdown events ──────────────────────────────────────────────
+@app.on_event("startup")
+def startup_event():
+    """Initialize MongoDB connection on app startup."""
+    print("🚀 Starting FashionAI Backend...")
+    if connect_to_mongodb():
+        print("✅ MongoDB ready, app started successfully!")
+    else:
+        print("⚠️  WARNING: MongoDB connection failed. Some features may not work.")
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    """Close MongoDB connection on app shutdown."""
+    print("🛑 Shutting down FashionAI Backend...")
+    close_mongodb()
+
+
 # ── endpoints ──────────────────────────────────────────────────────────────
 
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "FashionAI API is running"}
+    return {"status": "ok", "message": "FashionAI API (MongoDB) is running"}
 
 
 @app.get("/health")
@@ -231,8 +261,7 @@ async def recommend_by_image(
 ):
     """
     Upload an image → get similar fashion items.
-    The frontend calls this from image_upload_page.html after the user
-    selects / drops a photo.
+    Uses ResNet50 feature extraction and cosine similarity search in MongoDB.
     """
     try:
         contents = await file.read()
@@ -245,11 +274,9 @@ async def recommend_by_image(
 
         # Feature extraction + similarity search
         features = extract_features_from_array(img_arr)
-        df, embeddings = get_data()
-        indices, scores = find_similar_items(features, embeddings, top_k)
+        similar_items = find_similar_items_mongo(features, top_k)
 
-        products = [row_to_product(df.iloc[i], int(df.index[i]), float(s))
-                    for i, s in zip(indices, scores)]
+        products = [product_to_dict(prod, score) for prod, score in similar_items]
 
         return {
             "status":    "success",
@@ -278,34 +305,37 @@ def recommend_by_text(
     Used by the browse page and search bar.
     """
     try:
-        df, embeddings = get_data()
+        # Search products by type
+        query = {"product_type": product_type.lower()}
+        products = search_products(query, limit=100)
 
-        mask = df["product_type"].str.lower() == product_type.lower()
-        if color:
-            mask &= df["image_color"].str.lower() == color.lower()
-
-        filtered = df[mask]
-
-        if filtered.empty:
-            # relax color filter
-            filtered = df[df["product_type"].str.lower() == product_type.lower()]
-
-        if filtered.empty:
+        if not products:
             return {"status": "success", "results": [], "total": 0}
 
-        query_index = filtered.index[0]
-        _, scores   = find_similar_items(embeddings[query_index], embeddings, top_k + 1)
-        raw_indices, scores = find_similar_items(embeddings[query_index], embeddings, top_k + 1)
+        # If color filter specified, apply it
+        if color:
+            products = [p for p in products 
+                       if p.get("colour", "").lower() == color.lower()]
 
-        products = []
-        for i, s in zip(raw_indices, scores):
-            if int(df.index[i]) == query_index:
-                continue
-            products.append(row_to_product(df.iloc[i], int(df.index[i]), float(s)))
-            if len(products) >= top_k:
-                break
+        if not products:
+            return {"status": "success", "results": [], "total": 0}
 
-        return {"status": "success", "results": products, "total": len(products)}
+        # Find similar items to first result
+        first_product = products[0]
+        if "embedding" in first_product:
+            embedding = np.array(first_product["embedding"])
+            similar_items = find_similar_items_mongo(embedding, top_k + 1)
+            
+            # Filter out the query product itself
+            filtered = [
+                (prod, score) for prod, score in similar_items
+                if str(prod.get("_id")) != str(first_product.get("_id"))
+            ]
+            results = [product_to_dict(prod, score) for prod, score in filtered[:top_k]]
+        else:
+            results = [product_to_dict(p) for p in products[:top_k]]
+
+        return {"status": "success", "results": results, "total": len(results)}
 
     except HTTPException:
         raise
@@ -326,36 +356,43 @@ def list_products(
 ):
     """Paginated product listing for browse_products.html."""
     try:
-        df, _ = get_data()
-        mask   = pd.Series([True] * len(df), index=df.index)
-
+        # Build MongoDB query
+        query = {}
+        
         if product_type:
-            mask &= df["product_type"].str.lower() == product_type.lower()
+            query["product_type"] = product_type.lower()
         if color:
-            mask &= df.get("image_color", pd.Series([""] * len(df))).str.lower() == color.lower()
+            query["colour"] = color.lower()
         if brand:
-            mask &= df["brand"].str.lower().str.contains(brand.lower(), na=False)
+            query["brand"] = {"$regex": brand, "$options": "i"}
 
-        filtered = df[mask].copy()
+        # Get all matching products
+        all_products = search_products(query, limit=50000)
+        total = len(all_products)
 
+        # Sort
         if sort == "price_asc":
-            filtered["_price_num"] = pd.to_numeric(
-                filtered.get("selling_price", filtered.get("price", pd.Series())), errors="coerce"
+            all_products.sort(
+                key=lambda x: float(x.get("price", 0) or 0),
+                reverse=False
             )
-            filtered = filtered.sort_values("_price_num", ascending=True)
         elif sort == "price_desc":
-            filtered["_price_num"] = pd.to_numeric(
-                filtered.get("selling_price", filtered.get("price", pd.Series())), errors="coerce"
+            all_products.sort(
+                key=lambda x: float(x.get("price", 0) or 0),
+                reverse=True
             )
-            filtered = filtered.sort_values("_price_num", ascending=False)
         elif sort == "rating":
-            filtered = filtered.sort_values("rating", ascending=False) if "rating" in filtered else filtered
+            all_products.sort(
+                key=lambda x: float(x.get("rating", 0) or 0),
+                reverse=True
+            )
 
-        total = len(filtered)
+        # Paginate
         start = (page - 1) * per_page
-        page_df = filtered.iloc[start: start + per_page]
+        page_products = all_products[start: start + per_page]
 
-        products = [row_to_product(row, idx) for idx, row in page_df.iterrows()]
+        products = [product_to_dict(p) for p in page_products]
+        pages = (total + per_page - 1) // per_page
 
         return {
             "status":   "success",
@@ -363,7 +400,7 @@ def list_products(
             "total":    total,
             "page":     page,
             "per_page": per_page,
-            "pages":    (total + per_page - 1) // per_page,
+            "pages":    pages,
         }
 
     except HTTPException:
@@ -375,23 +412,35 @@ def list_products(
 
 # ── 4. Single product detail ────────────────────────────────────────────────
 @app.get("/api/products/{product_id}")
-def get_product(product_id: int):
+def get_product(product_id: str):
     """Return one product + similar items. Used by product_detail.html."""
     try:
-        df, embeddings = get_data()
+        product = get_product_by_id(product_id)
 
-        if product_id not in df.index:
+        if product is None:
             raise HTTPException(404, f"Product {product_id} not found")
 
-        row     = df.loc[product_id]
-        product = row_to_product(row, product_id)
+        product_dict = product_to_dict(product)
 
-        # similar items
-        indices, scores = find_similar_items(embeddings[product_id], embeddings, 6)
-        similar = [row_to_product(df.iloc[i], int(df.index[i]), float(s))
-                   for i, s in zip(indices, scores) if int(df.index[i]) != product_id][:5]
+        # Find similar items
+        if "embedding" in product:
+            embedding = np.array(product["embedding"])
+            similar_items = find_similar_items_mongo(embedding, 6)
+            
+            # Filter out the product itself
+            similar = [
+                product_to_dict(prod, score) 
+                for prod, score in similar_items
+                if str(prod.get("_id")) != str(product.get("_id"))
+            ][:5]
+        else:
+            similar = []
 
-        return {"status": "success", "product": product, "similar": similar}
+        return {
+            "status": "success",
+            "product": product_dict,
+            "similar": similar
+        }
 
     except HTTPException:
         raise
@@ -426,15 +475,39 @@ def detect_type(text: str = Query(...)):
 @app.get("/api/stats")
 def get_stats():
     try:
-        df, embeddings = get_data()
+        products = get_all_products(limit=50000)
+        
+        # Count statistics
+        product_types = {}
+        colors = {}
+        brands = set()
+        clusters = set()
+        embedding_dim = 0
+
+        for prod in products:
+            ptype = prod.get("product_type", "unknown")
+            product_types[ptype] = product_types.get(ptype, 0) + 1
+            
+            color = prod.get("colour", "unknown")
+            colors[color] = colors.get(color, 0) + 1
+            
+            if prod.get("brand"):
+                brands.add(prod.get("brand"))
+            
+            if prod.get("cluster"):
+                clusters.add(prod.get("cluster"))
+            
+            if "embedding" in prod and embedding_dim == 0:
+                embedding_dim = len(prod["embedding"])
+
         return {
             "status":         "success",
-            "total_products": int(len(df)),
-            "embedding_dim":  int(embeddings.shape[1]) if embeddings.ndim > 1 else 0,
-            "product_types":  df["product_type"].value_counts().to_dict() if "product_type" in df else {},
-            "colors":         df["image_color"].value_counts().to_dict()  if "image_color"  in df else {},
-            "brands":         int(df["brand"].nunique()) if "brand" in df else 0,
-            "clusters":       int(df["cluster"].nunique()) if "cluster" in df else 0,
+            "total_products": len(products),
+            "embedding_dim":  embedding_dim,
+            "product_types":  product_types,
+            "colors":         colors,
+            "brands":         len(brands),
+            "clusters":       len(clusters),
         }
     except Exception as e:
         traceback.print_exc()

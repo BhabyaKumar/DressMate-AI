@@ -7,3 +7,4 @@ pandas>=2.2.0
 pillow>=10.0.0
 opencv-python-headless>=4.9.0
 tensorflow>=2.15.0        # for ResNet50 feature extraction
+pymongo>=4.6.0            # for MongoDB driver
