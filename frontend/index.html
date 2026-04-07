@@ -22,8 +22,15 @@
   }
 </script>
 <title>FashionAI - Intelligent Recommendations</title>
+<script src="auth.js"></script>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<script>
+  // Check if user is authenticated, redirect to login if not
+  if (!AUTH.isAuthenticated()) {
+    window.location.href = "login.html";
+  }
+</script>
 <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
 <div class="layout-container flex h-full grow flex-col">
 
@@ -48,9 +55,23 @@
       <span class="material-symbols-outlined">search</span>
     </button>
     <div class="h-6 w-px bg-slate-200"></div>
-    <button onclick="alert('Sign In coming soon!')" class="flex min-w-[100px] cursor-pointer items-center justify-center rounded-full h-10 px-6 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
-      Sign In
-    </button>
+    <!-- User Profile Dropdown -->
+    <div class="relative">
+      <button onclick="document.querySelector('#user-menu').classList.toggle('hidden')" class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-slate-100 transition-colors">
+        <span class="material-symbols-outlined">account_circle</span>
+        <span id="user-name-header" class="text-sm font-semibold text-slate-700"></span>
+        <span class="material-symbols-outlined text-sm">arrow_drop_down</span>
+      </button>
+      <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg z-50">
+        <div class="px-4 py-3 border-b border-slate-200">
+          <p class="text-sm font-semibold" id="user-name-menu">User</p>
+          <p class="text-xs text-slate-500" id="user-email-menu">email@example.com</p>
+        </div>
+        <a href="dashboard.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Dashboard</a>
+        <a href="my_wardrobe.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">My Wardrobe</a>
+        <button onclick="AUTH.logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -281,4 +302,21 @@
 </div>
 
 <script src="api.js"></script>
+<script>
+  // Initialize user display
+  const user = AUTH.getUser();
+  if (user) {
+    document.getElementById("user-name-header").textContent = user.name || user.email.split("@")[0];
+    document.getElementById("user-name-menu").textContent = user.name || "User";
+    document.getElementById("user-email-menu").textContent = user.email;
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    const userMenu = document.getElementById("user-menu");
+    if (!e.target.closest("#user-menu") && !e.target.closest("button[onclick*='user-menu']")) {
+      userMenu.classList.add("hidden");
+    }
+  });
+</script>
 </body></html>

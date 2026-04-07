@@ -28,7 +28,7 @@ import cv2
 from PIL import Image
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import KMeans
-from fastapi import FastAPI, File, UploadFile, Query, HTTPException
+from fastapi import FastAPI, File, UploadFile, Query, HTTPException, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -40,6 +40,22 @@ from database import (
     get_all_products,
     get_product_by_id,
     search_products,
+    insert_recommendation,
+    get_user_recommendations,
+)
+
+# Authentication imports
+from auth import (
+    UserRegister,
+    UserLogin,
+    TokenResponse,
+    UserProfile,
+    register_user,
+    authenticate_user,
+    create_access_token,
+    get_current_user,
+    get_current_user_optional,
+    update_user_preferences,
 )
 
 # ── paths ──────────────────────────────────────────────────────────────────
@@ -253,15 +269,97 @@ def health():
     return {"status": "healthy"}
 
 
+# ── Authentication endpoints ───────────────────────────────────────────────
+
+@app.post("/api/auth/register", response_model=TokenResponse)
+def register(user_data: UserRegister):
+    """
+    Register a new user.
+    Returns access token and user info on success.
+    """
+    try:
+        user_id = register_user(user_data.email, user_data.password, user_data.name)
+        token = create_access_token(user_id, user_data.email)
+        return {
+            "access_token": token,
+            "token_type": "bearer",
+            "user_id": user_id,
+            "email": user_data.email,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, str(e))
+
+
+@app.post("/api/auth/login", response_model=TokenResponse)
+def login(credentials: UserLogin):
+    """
+    Login user with email and password.
+    Returns access token and user info on success.
+    """
+    try:
+        user = authenticate_user(credentials.email, credentials.password)
+        token = create_access_token(str(user["_id"]), credentials.email)
+        return {
+            "access_token": token,
+            "token_type": "bearer",
+            "user_id": str(user["_id"]),
+            "email": credentials.email,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, str(e))
+
+
+@app.get("/api/auth/profile", response_model=UserProfile)
+def get_profile(current_user: dict = Depends(get_current_user)):
+    """
+    Get current user profile.
+    Requires authentication token.
+    """
+    try:
+        from database import db
+        from bson.objectid import ObjectId
+        
+        user_id = current_user.get("user_id")
+        try:
+            user = db.users.find_one({"_id": ObjectId(user_id)})
+        except:
+            user = db.users.find_one({"_id": int(user_id)})
+        
+        if not user:
+            raise HTTPException(404, "User not found")
+        
+        return {
+            "user_id": str(user["_id"]),
+            "email": user.get("email", ""),
+            "name": user.get("name", "User"),
+            "skin_tone": user.get("skin_tone"),
+            "preferred_colors": user.get("preferred_colors", []),
+            "preferred_types": user.get("preferred_types", []),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, str(e))
+
+
 # ── 1. Image-based recommendation (core feature) ───────────────────────────
 @app.post("/api/recommend/image")
 async def recommend_by_image(
     file: UploadFile = File(...),
     top_k: int = Query(8, ge=1, le=50),
+    current_user: dict = Depends(get_current_user_optional),
 ):
     """
     Upload an image → get similar fashion items.
     Uses ResNet50 feature extraction and cosine similarity search in MongoDB.
+    Optional: Pass Authorization token to save to recommendation history.
     """
     try:
         contents = await file.read()
@@ -277,6 +375,20 @@ async def recommend_by_image(
         similar_items = find_similar_items_mongo(features, top_k)
 
         products = [product_to_dict(prod, score) for prod, score in similar_items]
+
+        # Save to user's recommendation history if authenticated
+        if current_user:
+            try:
+                insert_recommendation({
+                    "user_id": current_user.get("user_id"),
+                    "type": "image",
+                    "skin_tone": skin_tone,
+                    "color": color,
+                    "product_ids": [p["id"] for p in products],
+                    "created_at": datetime.utcnow(),
+                })
+            except:
+                pass  # Silently fail if history save fails
 
         return {
             "status":    "success",
@@ -337,6 +449,44 @@ def recommend_by_text(
 
         return {"status": "success", "results": results, "total": len(results)}
 
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, str(e))
+
+
+# ── 2.5. Product search endpoint ──────────────────────────────────────────
+@app.get("/api/search")
+def search_products_endpoint(
+    query: str = Query(..., min_length=1, description="Search query"),
+    limit: int = Query(10, ge=1, le=100, description="Number of results"),
+):
+    """Search products by name, brand, or description."""
+    try:
+        # Build MongoDB filter for text search across multiple fields
+        search_filter = {
+            "$or": [
+                {"name": {"$regex": query, "$options": "i"}},
+                {"brand": {"$regex": query, "$options": "i"}},
+                {"description": {"$regex": query, "$options": "i"}},
+                {"colour": {"$regex": query, "$options": "i"}}
+            ]
+        }
+        products = search_products(search_filter, limit=limit)
+        
+        if not products:
+            return {"status": "success", "results": [], "total": 0}
+        
+        # Convert to dict format with similarity if available
+        results = [product_to_dict(p) for p in products]
+        
+        return {
+            "status": "success",
+            "results": results,
+            "total": len(results),
+            "query": query
+        }
     except HTTPException:
         raise
     except Exception as e:
@@ -471,7 +621,103 @@ def detect_type(text: str = Query(...)):
     return {"status": "success", "product_type": detect_product_type(text)}
 
 
-# ── 7. Dataset stats (dashboard / debug) ───────────────────────────────────
+# ── 7. User recommendation history ────────────────────────────────────────
+@app.get("/api/history")
+def get_history(
+    limit: int = Query(20, ge=1, le=100),
+    current_user: dict = Depends(get_current_user),
+):
+    """Get user's recommendation history."""
+    try:
+        user_id = current_user.get("user_id")
+        recommendations = get_user_recommendations(user_id, limit)
+        return {
+            "status": "success",
+            "total": len(recommendations),
+            "history": [
+                {
+                    "id": str(rec.get("_id", "")),
+                    "type": rec.get("type", ""),
+                    "created_at": str(rec.get("created_at", "")),
+                    "details": {
+                        "skin_tone": rec.get("skin_tone"),
+                        "color": rec.get("color"),
+                        "product_ids": rec.get("product_ids", []),
+                    }
+                }
+                for rec in recommendations
+            ]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, str(e))
+
+
+# ── 8. AI Chat with Gemini ────────────────────────────────────────────────
+@app.post("/api/chat")
+async def chat(
+    message: str = Query(..., description="User message"),
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Chat with AI stylist powered by Gemini.
+    Requires authentication token.
+    """
+    try:
+        # Get user profile for context
+        from database import db
+        from bson.objectid import ObjectId
+        
+        user_id = current_user.get("user_id")
+        try:
+            user = db.users.find_one({"_id": ObjectId(user_id)})
+        except:
+            user = db.users.find_one({"_id": int(user_id)})
+        
+        # Import Gemini API
+        import google.generativeai as genai
+        
+        # Configure Gemini
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise HTTPException(
+                400,
+                "Gemini API key not configured. Set GEMINI_API_KEY in .env"
+            )
+        genai.configure(api_key=api_key)
+        
+        # Build context from user profile
+        context = f"""You are a professional fashion stylist AI assistant. You help users find perfect outfits and fashion advice.
+
+User Profile:
+- Name: {user.get('name', 'User') if user else 'User'}
+- Skin Tone: {user.get('skin_tone', 'Unknown') if user else 'Unknown'}
+- Preferred Colors: {', '.join(user.get('preferred_colors', [])) if user else 'Not set'}
+- Preferred Types: {', '.join(user.get('preferred_types', [])) if user else 'Not set'}
+
+Be helpful, professional, and personalized. Provide fashion recommendations based on their profile."""
+        
+        # Create model and generate response
+        model = genai.GenerativeModel('gemini-pro')
+        full_prompt = context + "\n\nUser: " + message
+        response = model.generate_content(full_prompt)
+        
+        return {
+            "status": "success",
+            "message": message,
+            "response": response.text,
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, f"Chat error: {str(e)}")
+
+
+# ── 9. Dataset stats (dashboard / debug) ───────────────────────────────────
 @app.get("/api/stats")
 def get_stats():
     try:

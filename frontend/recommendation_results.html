@@ -20,6 +20,7 @@
 <title>Fashion AI Recommendations</title>
 </head>
 <body class="bg-background-light font-display text-slate-900 antialiased">
+<script src="auth.js"></script>
 <!-- Navigation -->
 <header class="sticky top-0 z-50 bg-background-light/80 backdrop-blur-md border-b border-primary/10 px-4 md:px-10 py-3">
   <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -48,8 +49,18 @@
           <span class="material-symbols-outlined">notifications</span>
           <span class="absolute top-2 right-2 size-2 bg-primary rounded-full"></span>
         </button>
-        <div class="size-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/10 cursor-pointer">
-          <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtznFeJGuVqoyONo15k841njdBjOvPAY78FoEuCxkR7l9EHP_C-fcZag-o3fMbYH948OsqA9YccljbtKiPreEg7X_W92j0_VtquhYep_ETPeJpgJ43NJHXGTrcUWQWBMIXGQutZ9mJY8M9wXjKRHI0abv43B9H8Q6xFE0D8QIu5-2cptq7Ty64rXC6mRAJl_wEdxTVIMH5lYaUIp-qM7BtZ6OfWSMPL8pA7pN_x2p7jEC5Lw3WUShZG4qWfygsIbLglNbGviABOmw"/>
+        <div class="relative">
+          <div class="size-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/10 cursor-pointer hover:border-primary/50 transition-all" id="userButton" onclick="toggleUserDropdown()">
+            <img class="w-full h-full object-cover" id="userAvatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtznFeJGuVqoyONo15k841njdBjOvPAY78FoEuCxkR7l9EHP_C-fcZag-o3fMbYH948OsqA9YccljbtKiPreEg7X_W92j0_VtquhYep_ETPeJpgJ43NJHXGTrcUWQWBMIXGQutZ9mJY8M9wXjKRHI0abv43B9H8Q6xFE0D8QIu5-2cptq7Ty64rXC6mRAJl_wEdxTVIMH5lYaUIp-qM7BtZ6OfWSMPL8pA7pN_x2p7jEC5Lw3WUShZG4qWfygsIbLglNbGviABOmw"/>
+          </div>
+          <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
+            <div class="px-4 py-2 border-b border-slate-100">
+              <p class="text-sm font-semibold text-slate-900" id="userNameDropdown">User</p>
+              <p class="text-xs text-slate-500" id="userEmailDropdown">email@example.com</p>
+            </div>
+            <a href="dashboard.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</a>
+            <button onclick="AUTH.logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
+          </div>
         </div>
       </div>
     </div>
@@ -118,6 +129,25 @@
     <!-- Cards with click-through to product detail -->
     <script src="api.js"></script>
     <script>
+      function toggleUserDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('hidden');
+        document.addEventListener('click', function closeDropdown(e) {
+          if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
+            dropdown.classList.add('hidden');
+            document.removeEventListener('click', closeDropdown);
+          }
+        });
+      }
+
+      window.addEventListener('load', function() {
+        const profile = AUTH.getProfile();
+        if (profile) {
+          document.getElementById('userNameDropdown').textContent = profile.name || 'User';
+          document.getElementById('userEmailDropdown').textContent = profile.email || 'email@example.com';
+        }
+      });
+
       let allResults = [];
       let currentPage = 0;
       const PAGE_SIZE = 8;

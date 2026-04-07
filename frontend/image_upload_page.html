@@ -49,8 +49,18 @@
     <button class="p-2 text-slate-600 hover:bg-primary/10 rounded-full transition-colors">
       <span class="material-symbols-outlined">notifications</span>
     </button>
-    <div class="h-10 w-10 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center overflow-hidden cursor-pointer">
-      <img class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnUD9HujDAWz7PJzUXTfZ5VjFRX7QkPsjJvxU_6s5sNwSwDyJI5PF6EtvddtWvlDXqwKapy4Tm6oTyde7kgJNc7vsWP5lLokE0IL9ISSRZcERAJ6W7XT-tZxwOKfUWzr1YFhR2bL-p-KwrgGZbpjNHjq7YCEVQipI3rzwgp9sVFZj6LgMNztE6ebPp0Wq-YYQEhgsAbLXUIen4P4IzwKxhck9x-6F-dy8V8AXhLxWLwku8u58MYPxu_GLZQ5byIVw9AL_te1-Q900"/>
+    <div class="relative">
+      <div class="h-10 w-10 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary/50 transition-all" id="userButton" onclick="toggleUserDropdown()">
+        <img class="h-full w-full object-cover" id="userAvatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnUD9HujDAWz7PJzUXTfZ5VjFRX7QkPsjJvxU_6s5sNwSwDyJI5PF6EtvddtWvlDXqwKapy4Tm6oTyde7kgJNc7vsWP5lLokE0IL9ISSRZcERAJ6W7XT-tZxwOKfUWzr1YFhR2bL-p-KwrgGZbpjNHjq7YCEVQipI3rzwgp9sVFZj6LgMNztE6ebPp0Wq-YYQEhgsAbLXUIen4P4IzwKxhck9x-6F-dy8V8AXhLxWLwku8u58MYPxu_GLZQ5byIVw9AL_te1-Q900"/>
+      </div>
+      <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
+        <div class="px-4 py-2 border-b border-slate-100">
+          <p class="text-sm font-semibold text-slate-900" id="userNameDropdown">User</p>
+          <p class="text-xs text-slate-500" id="userEmailDropdown">email@example.com</p>
+        </div>
+        <a href="my_wardrobe.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">My Wardrobe</a>
+        <button onclick="AUTH.logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
+      </div>
     </div>
   </div>
 </header>
@@ -94,7 +104,7 @@
 
       <!-- Secondary Options -->
       <div class="grid grid-cols-2 gap-4">
-        <button onclick="document.getElementById('fileInput').click()" class="flex items-center justify-center gap-2 p-4 rounded-xl border border-primary/20 bg-white text-slate-700 hover:bg-primary/5 transition-colors">
+        <button onclick="showRecommendationHistory()" class="flex items-center justify-center gap-2 p-4 rounded-xl border border-primary/20 bg-white text-slate-700 hover:bg-primary/5 transition-colors">
           <span class="material-symbols-outlined text-primary">history</span>
           <span class="text-sm font-semibold">Past Uploads</span>
         </button>
@@ -167,7 +177,48 @@
 
 </div>
 <script src="api.js"></script>
+<script src="auth.js"></script>
 <script>
+  // Auth check - redirect to login if not authenticated
+  window.addEventListener('load', function() {
+    if (!AUTH.isAuthenticated()) {
+      window.location.href = 'login.html';
+      return;
+    }
+    // Display user info
+    const profile = AUTH.getProfile();
+    if (profile) {
+      document.getElementById('userNameDropdown').textContent = profile.name || 'User';
+      document.getElementById('userEmailDropdown').textContent = profile.email || 'email@example.com';
+    }
+  });
+
+  function toggleUserDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.toggle('hidden');
+    // Close dropdown if clicking outside
+    document.addEventListener('click', function closeDropdown(e) {
+      if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
+        dropdown.classList.add('hidden');
+        document.removeEventListener('click', closeDropdown);
+      }
+    });
+  }
+
+  async function showRecommendationHistory() {
+    try {
+      const history = await AUTH.getHistory();
+      if (history && history.length > 0) {
+        sessionStorage.setItem('recommendation_history', JSON.stringify(history));
+        window.location.href = 'my_wardrobe.html';
+      } else {
+        alert('No past uploads found. Start by uploading an image!');
+      }
+    } catch (err) {
+      alert('Unable to load history: ' + (err.message || 'Unknown error'));
+    }
+  }
+
   const fileInput = document.getElementById('fileInput');
   const previewImg = document.getElementById('previewImg');
   const emptyState = document.getElementById('emptyState');
@@ -221,15 +272,26 @@
     };
     reader.readAsDataURL(selectedFile);
 
-    // Call backend
+    // Call backend with authentication
     try {
-      const data = await API.recommendByImage(selectedFile, 12);
+      const data = await AUTH.uploadImage(selectedFile, 12);
+      
+      // Check if there was an error in the response
+      if (data.error) {
+        console.error('Upload error:', data.error);
+        btn.disabled = false;
+        btn.innerHTML = `<span class="material-symbols-outlined">auto_awesome</span> Find Similar Items`;
+        alert('Error: ' + data.error);
+        return;
+      }
+      
       sessionStorage.setItem('recommendation_results', JSON.stringify(data));
       window.location.href = 'system_feedback.html';
     } catch (err) {
-      // If backend not reachable, still go to loading page (demo mode)
-      sessionStorage.setItem('recommendation_results', JSON.stringify({ error: err.message }));
-      window.location.href = 'system_feedback.html';
+      console.error('Exception during upload:', err);
+      btn.disabled = false;
+      btn.innerHTML = `<span class="material-symbols-outlined">auto_awesome</span> Find Similar Items`;
+      alert('Error: ' + (err.message || 'Failed to process image'));
     }
   }
 </script>

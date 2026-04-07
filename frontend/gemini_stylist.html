@@ -25,6 +25,14 @@
 </style>
 </head>
 <body class="bg-background-light text-slate-900 antialiased">
+<script src="auth.js"></script>
+<script>
+  window.addEventListener('load', function() {
+    if (!AUTH.isAuthenticated()) {
+      window.location.href = 'login.html';
+    }
+  });
+</script>
 <div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
 <div class="layout-container flex h-full grow flex-col">
 
@@ -53,14 +61,45 @@
       <span class="material-symbols-outlined">notifications</span>
     </button>
     <div class="h-8 w-px bg-slate-200 mx-1"></div>
-    <div class="size-8 rounded-full overflow-hidden border border-slate-200">
-      <img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA35itP53cb1hbKAj8GP4aN_q6w1HwV3MGqZVBqMfXIaDejVHJW7samAyRTXmvFqDCjfJ7Dzo1FtYz2_Ez09zHD9GSo7Vmu8RWf4RNVic_2hMzx1Jm2DOIwqFOd2cPmM25PCwAn79j515ed_SFcKrAghfX_BFgqKY-NMJtRUm324X7BHuU2vYzAH6nzuL2SEgYynddnWlM45SUWOkPBy-hD1o0HAtgDtbRs84HWITG-wvhNlPyClD5Nu02NOBcC5Ou2gG6J0qlyQU0"/>
+    <div class="relative">
+      <div class="size-8 rounded-full overflow-hidden border border-slate-200 cursor-pointer hover:border-primary/50 transition-all" id="userButton" onclick="toggleUserDropdown()">
+        <img alt="User profile" class="w-full h-full object-cover" id="userAvatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA35itP53cb1hbKAj8GP4aN_q6w1HwV3MGqZVBqMfXIaDejVHJW7samAyRTXmvFqDCjfJ7Dzo1FtYz2_Ez09zHD9GSo7Vmu8RWf4RNVic_2hMzx1Jm2DOIwqFOd2cPmM25PCwAn79j515ed_SFcKrAghfX_BFgqKY-NMJtRUm324X7BHuU2vYzAH6nzuL2SEgYynddnWlM45SUWOkPBy-hD1o0HAtgDtbRs84HWITG-wvhNlPyClD5Nu02NOBcC5Ou2gG6J0qlyQU0"/>
+      </div>
+      <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
+        <div class="px-4 py-2 border-b border-slate-100">
+          <p class="text-sm font-semibold text-slate-900" id="userNameDropdown">User</p>
+          <p class="text-xs text-slate-500" id="userEmailDropdown">email@example.com</p>
+        </div>
+        <a href="dashboard.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</a>
+        <button onclick="AUTH.logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
+      </div>
     </div>
   </div>
 </header>
 
 <!-- Main Chat Area -->
 <main class="flex flex-1 justify-center py-6 md:py-10 px-4">
+<script src="api.js"></script>
+<script>
+  function toggleUserDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.toggle('hidden');
+    document.addEventListener('click', function closeDropdown(e) {
+      if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
+        dropdown.classList.add('hidden');
+        document.removeEventListener('click', closeDropdown);
+      }
+    });
+  }
+
+  window.addEventListener('load', function() {
+    const profile = AUTH.getProfile();
+    if (profile) {
+      document.getElementById('userNameDropdown').textContent = profile.name || 'User';
+      document.getElementById('userEmailDropdown').textContent = profile.email || 'email@example.com';
+    }
+  });
+</script>
   <div class="layout-content-container flex flex-col max-w-[800px] flex-1 w-full space-y-6">
 
     <!-- Chat Messages -->

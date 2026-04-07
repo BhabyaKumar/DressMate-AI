@@ -51,8 +51,16 @@
         <a href="my_wardrobe.html" class="p-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary">
           <span class="material-symbols-outlined">favorite</span>
         </a>
-        <div class="size-10 rounded-full bg-slate-200 overflow-hidden border-2 border-primary/20">
-          <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBP1EDlVwD0d1mdaTiqwB2nGCZ7YA-VncMS4siBR49_Tw7BUZj2K3tvfcZCi6RKVMx11x3DO5gA2hQMW3HO0GMvxKIIx0DKhsmYeusVB3rj2FYdRdvYzfv_IZW3Vtj6DJ-GilTUbmp4K6fIMNmbM7tPyKNLC0dHd7lM-K24m3EHLB5C6sC7hCtqqoyDTdgTLQbGYxVbBceNnxv6q3JnNXdru2LcaTS3RRh3qpPKi4EGYohsOiS8Avwwo9rJ_UGBdta8G3CNW_3Y2Y"/>
+        <div class="relative">
+          <div id="userButton" class="size-10 rounded-full bg-slate-200 overflow-hidden border-2 border-primary/20 hover:border-primary/50 transition-all cursor-pointer" onclick="toggleUserDropdown()">
+            <img class="w-full h-full object-cover" id="userAvatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBP1EDlVwD0d1mdaTiqwB2nGCZ7YA-VncMS4siBR49_Tw7BUZj2K3tvfcZCi6RKVMx11x3DO5gA2hQMW3HO0GMvxKIIx0DKhsmYeusVB3rj2FYdRdvYzfv_IZW3Vtj6DJ-GilTUbmp4K6fIMNmbM7tPyKNLC0dHd7lM-K24m3EHLB5C6sC7hCtqqoyDTdgTLQbGYxVbBceNnxv6q3JnNXdru2LcaTS3RRh3qpPKi4EGYohsOiS8Avwwo9rJ_UGBdta8G3CNW_3Y2Y"/>
+          </div>
+          <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
+            <div class="px-4 py-2 border-b border-slate-100" id="userDropdownContent">
+              <p class="text-sm font-semibold text-slate-900"><a href="login.html">Sign In</a></p>
+            </div>
+            <a href="my_wardrobe.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">My Wardrobe</a>
+          </div>
         </div>
       </div>
     </div>
@@ -183,12 +191,43 @@
 
 </div>
 <script src="api.js"></script>
+<script src="auth.js"></script>
 <script>
   let currentPage = 1;
   let totalPages  = 1;
   let currentSort = 'relevance';
   let activeType  = '';
   let activeColor = '';
+
+  // Optional auth - check if user is logged in
+  window.addEventListener('load', function() {
+    if (AUTH.isAuthenticated()) {
+      const profile = AUTH.getProfile();
+      if (profile) {
+        document.getElementById('userDropdownContent').innerHTML = `
+          <p class="text-sm font-semibold text-slate-900">${profile.name || 'User'}</p>
+          <p class="text-xs text-slate-500">${profile.email || 'email@example.com'}</p>
+        `;
+        const logoutBtn = document.createElement('button');
+        logoutBtn.textContent = 'Logout';
+        logoutBtn.className = 'w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50';
+        logoutBtn.onclick = () => AUTH.logout();
+        document.getElementById('userDropdown').appendChild(logoutBtn);
+      }
+    }
+  });
+
+  function toggleUserDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.toggle('hidden');
+    // Close dropdown if clicking outside
+    document.addEventListener('click', function closeDropdown(e) {
+      if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
+        dropdown.classList.add('hidden');
+        document.removeEventListener('click', closeDropdown);
+      }
+    });
+  }
 
   async function loadProducts() {
     const grid = document.getElementById('productsGrid');

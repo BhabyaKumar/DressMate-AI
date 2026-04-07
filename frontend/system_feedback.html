@@ -32,6 +32,7 @@
 </style>
 </head>
 <body class="bg-background-light font-display text-slate-900 min-h-screen">
+<script src="auth.js"></script>
 <div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
 <div class="layout-container flex h-full grow flex-col">
 
@@ -51,7 +52,17 @@
     <button class="flex items-center justify-center rounded-full h-10 w-10 bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
       <span class="material-symbols-outlined">settings</span>
     </button>
-    <div class="size-10 rounded-full border-2 border-primary bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCyPpvLvEK362Y5e_RN_RclBwrTdgMMaC4v_qsYMSFg17tVmm2cT9oRCfX33KCdU22bq1Td4qDaTr_oaW9UmYL7ycFNRMKB5wTxozpG-PriXC1KkRwpfrhbNxn3R2qkb6kGvRB5CI-rqswskrb6ffi2Pu3Qr_OVf2Zv9CVD-4OBOVENJNl5h3DWQ3QrvdatJc3G0X1OCyygmLY3nIA-jw_JsZC8AuId-2jW-o7JVoIR_NEVTQ7qOd28jwOf4CrHgKtRAitik9Td3TI')"></div>
+    <div class="relative">
+      <div class="size-10 rounded-full border-2 border-primary bg-cover bg-center cursor-pointer hover:border-primary/50 transition-all" id="userButton" onclick="toggleUserDropdown()" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCyPpvLvEK362Y5e_RN_RclBwrTdgMMaC4v_qsYMSFg17tVmm2cT9oRCfX33KCdU22bq1Td4qDaTr_oaW9UmYL7ycFNRMKB5wTxozpG-PriXC1KkRwpfrhbNxn3R2qkb6kGvRB5CI-rqswskrb6ffi2Pu3Qr_OVf2Zv9CVD-4OBOVENJNl5h3DWQ3QrvdatJc3G0X1OCyygmLY3nIA-jw_JsZC8AuId-2jW-o7JVoIR_NEVTQ7qOd28jwOf4CrHgKtRAitik9Td3TI')"></div>
+      <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
+        <div class="px-4 py-2 border-b border-slate-100">
+          <p class="text-sm font-semibold text-slate-900" id="userNameDropdown">User</p>
+          <p class="text-xs text-slate-500" id="userEmailDropdown">email@example.com</p>
+        </div>
+        <a href="dashboard.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</a>
+        <button onclick="AUTH.logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -110,7 +121,27 @@
 </div>
 </div>
 
+<script src="api.js"></script>
 <script>
+  function toggleUserDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.toggle('hidden');
+    document.addEventListener('click', function closeDropdown(e) {
+      if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
+        dropdown.classList.add('hidden');
+        document.removeEventListener('click', closeDropdown);
+      }
+    });
+  }
+
+  window.addEventListener('load', function() {
+    const profile = AUTH.getProfile();
+    if (profile) {
+      document.getElementById('userNameDropdown').textContent = profile.name || 'User';
+      document.getElementById('userEmailDropdown').textContent = profile.email || 'email@example.com';
+    }
+  });
+  
   const steps = [
     { label: 'Detecting clothing type...', pct: 20 },
     { label: 'Matching silhouettes...', pct: 40 },

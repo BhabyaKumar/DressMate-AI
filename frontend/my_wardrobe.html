@@ -21,6 +21,14 @@
 <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
 <body class="bg-background-light text-slate-900 min-h-screen">
+<script src="auth.js"></script>
+<script>
+  window.addEventListener('load', function() {
+    if (!AUTH.isAuthenticated()) {
+      window.location.href = 'login.html';
+    }
+  });
+</script>
 <div class="layout-container flex h-full flex-col">
 
 <!-- Navigation Bar -->
@@ -45,8 +53,16 @@
         <input class="flex w-full min-w-0 flex-1 border-none bg-transparent focus:outline-0 focus:ring-0 h-full placeholder:text-slate-400 text-sm" placeholder="Search saved items"/>
       </div>
     </div>
-    <div class="bg-primary/20 rounded-full p-1 border border-primary/10 cursor-pointer">
-      <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCmcNqJVo6J8qSVE-WifA4m9DYgAHIH6d9cZvWBKL0Ht3l9Sn3WM0Dxq-IgUtpquCkiM1BUXdOPNDwX6qpqcmhV0tSjHJwgAVjm3J8hRCIL0oqZMOsraxZcdfjkxacZHMHYILRi0gyFN566ANKUbUPTAs9L09Jbi6Be53F7ACpwvrEabw3-zc6vSNUSskx926K4zyyOaqNcTF_gNr1mb5xpQW4kHszGp-Qn8b6Vx6Cvy7v83fe_1sW1t2MHjN9UIFeLuk8wnP0K2fo");'></div>
+    <div class="bg-primary/20 rounded-full p-1 border border-primary/10 cursor-pointer hover:border-primary/50 transition-all" id="userButton" onclick="toggleUserDropdown()">
+      <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8" id="userAvatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCmcNqJVo6J8qSVE-WifA4m9DYgAHIH6d9cZvWBKL0Ht3l9Sn3WM0Dxq-IgUtpquCkiM1BUXdOPNDwX6qpqcmhV0tSjHJwgAVjm3J8hRCIL0oqZMOsraxZcdfjkxacZHMHYILRi0gyFN566ANKUbUPTAs9L09Jbi6Be53F7ACpwvrEabw3-zc6vSNUSskx926K4zyyOaqNcTF_gNr1mb5xpQW4kHszGp-Qn8b6Vx6Cvy7v83fe_1sW1t2MHjN9UIFeLuk8wnP0K2fo");'></div>
+    </div>
+    <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
+      <div class="px-4 py-2 border-b border-slate-100">
+        <p class="text-sm font-semibold text-slate-900" id="userNameDropdown">User</p>
+        <p class="text-xs text-slate-500" id="userEmailDropdown">email@example.com</p>
+      </div>
+      <a href="dashboard.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</a>
+      <button onclick="AUTH.logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
     </div>
   </div>
 </header>
@@ -193,6 +209,25 @@
 </div>
 <script src="api.js"></script>
 <script>
+  function toggleUserDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.toggle('hidden');
+    document.addEventListener('click', function closeDropdown(e) {
+      if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
+        dropdown.classList.add('hidden');
+        document.removeEventListener('click', closeDropdown);
+      }
+    });
+  }
+
+  window.addEventListener('load', function() {
+    const profile = AUTH.getProfile();
+    if (profile) {
+      document.getElementById('userNameDropdown').textContent = profile.name || 'User';
+      document.getElementById('userEmailDropdown').textContent = profile.email || 'email@example.com';
+    }
+  });
+
   document.getElementById('share-wardrobe-btn').addEventListener('click', function(e) {
     e.stopPropagation();
     document.getElementById('share-dropdown').classList.toggle('hidden');

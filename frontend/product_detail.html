@@ -20,6 +20,7 @@
 <title>AI Fashion - Style Insight</title>
 </head>
 <body class="bg-background-light font-display text-slate-900 antialiased">
+<script src="auth.js"></script>
 <div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
 
 <!-- Navigation -->
@@ -52,7 +53,18 @@
         <button class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-slate-700 hover:bg-primary/20 transition-colors">
           <span class="material-symbols-outlined">notifications</span>
         </button>
-        <div class="h-10 w-10 rounded-full bg-cover bg-center border-2 border-primary/20 cursor-pointer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC0PysXgo076iDu-B1mvObBUOcKMarpxR8QPLUT7l1MaEasBpMbQzFfi9nkZnVfB6IZOvh_50F-UkO3aio9ZMzGs3r9-Vj8nhwg0rRB_a5XD6zgarx04Z_cmvMMBSSkuyTByT2E0ZwDbg2-8XCxlvqn-NFidamnCYkIQ0AgSSwL0HtFe6JQgOH4_K52A3zBe8L3Pcg2Oa38byOhBpsmDidZyFK2L0GvCo1BhOSbXVLOp2C0TT7HclMbP_NaLmLwAY-jKUCummW0zBM");'></div>
+        <div class="h-px bg-slate-200 w-6"></div>
+        <div class="relative">
+          <div class="h-10 w-10 rounded-full bg-cover bg-center border-2 border-primary/20 cursor-pointer hover:border-primary/50 transition-all" id="userButton" onclick="toggleUserDropdown()" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC0PysXgo076iDu-B1mvObBUOcKMarpxR8QPLUT7l1MaEasBpMbQzFfi9nkZnVfB6IZOvh_50F-UkO3aio9ZMzGs3r9-Vj8nhwg0rRB_a5XD6zgarx04Z_cmvMMBSSkuyTByT2E0ZwDbg2-8XCxlvqn-NFidamnCYkIQ0AgSSwL0HtFe6JQgOH4_K52A3zBe8L3Pcg2Oa38byOhBpsmDidZyFK2L0GvCo1BhOSbXVLOp2C0TT7HclMbP_NaLmLwAY-jKUCummW0zBM");'></div>
+          <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
+            <div class="px-4 py-2 border-b border-slate-100">
+              <p class="text-sm font-semibold text-slate-900" id="userNameDropdown">User</p>
+              <p class="text-xs text-slate-500" id="userEmailDropdown">email@example.com</p>
+            </div>
+            <a href="dashboard.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</a>
+            <button onclick="AUTH.logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -256,6 +268,25 @@
 </div>
 <script src="api.js"></script>
 <script>
+  function toggleUserDropdown() {
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.toggle('hidden');
+    document.addEventListener('click', function closeDropdown(e) {
+      if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
+        dropdown.classList.add('hidden');
+        document.removeEventListener('click', closeDropdown);
+      }
+    });
+  }
+
+  window.addEventListener('load', function() {
+    const profile = AUTH.getProfile();
+    if (profile) {
+      document.getElementById('userNameDropdown').textContent = profile.name || 'User';
+      document.getElementById('userEmailDropdown').textContent = profile.email || 'email@example.com';
+    }
+  });
+  
   // ── helpers ──────────────────────────────────────────────────────────────
   function fixImageUrl(url) {
     if (!url) return 'https://placehold.co/600x800?text=No+Image';
