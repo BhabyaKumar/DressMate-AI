@@ -19,8 +19,12 @@ const API = {
     const fd = new FormData();
     fd.append("file", file);
     fd.append("top_k", topK);
+    const headers = (typeof AUTH !== "undefined" && AUTH.getAuthHeader)
+      ? AUTH.getAuthHeader()
+      : {};
     const r = await fetch(`${API_BASE}/api/recommend/image?top_k=${topK}`, {
       method: "POST",
+      headers,
       body: fd,
     });
     if (!r.ok) throw new Error(`Server error ${r.status}`);
@@ -31,9 +35,42 @@ const API = {
   async recommendByText(productType, color = "", topK = 8) {
     const params = new URLSearchParams({ product_type: productType, top_k: topK });
     if (color) params.append("color", color);
-    const r = await fetch(`${API_BASE}/api/recommend/text?${params}`);
+    const headers = (typeof AUTH !== "undefined" && AUTH.getAuthHeader)
+      ? AUTH.getAuthHeader()
+      : {};
+    const r = await fetch(`${API_BASE}/api/recommend/text?${params}`, { headers });
     if (!r.ok) throw new Error(`Server error ${r.status}`);
     return r.json();
+  },
+
+  /* ── recommendation feedback for personalization ── */
+  async submitFeedback(productId, action, source = "recommendation_results") {
+    try {
+      if (!(typeof AUTH !== "undefined" && AUTH.isAuthenticated && AUTH.isAuthenticated())) {
+        return { status: "skipped", reason: "unauthenticated" };
+      }
+
+      const r = await fetch(`${API_BASE}/api/recommend/feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...AUTH.getAuthHeader(),
+        },
+        body: JSON.stringify({
+          product_id: String(productId),
+          action,
+          source,
+        }),
+      });
+
+      if (!r.ok) {
+        return { status: "error", code: r.status };
+      }
+
+      return r.json();
+    } catch (e) {
+      return { status: "error", message: e.message };
+    }
   },
 
   /* ── browse / catalogue ── */
@@ -93,8 +130,8 @@ function renderProductCard(p, { onclick = null, showSimilarity = false } = {}) {
   const simPct  = showSimilarity ? Math.round((p.similarity || 0) * 100) : null;
 
   const clickAttr = onclick
-    ? `onclick="${onclick}(${p.id})"`
-    : `onclick="window.location='product_detail.html?id=${p.id}'"`;
+    ? `onclick="trackProductClick('${p.id}'); ${onclick}(${p.id})"`
+    : `onclick="trackProductClick('${p.id}'); window.location='product_detail.html?id=${p.id}'"`;
 
   return `
     <div class="product-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg
@@ -143,7 +180,12 @@ function toggleFav(btn, id) {
     icon.textContent = "favorite";
     icon.classList.remove("text-slate-400");
     icon.classList.add("text-red-500");
+    API.submitFeedback(id, "save", "favorite_button");
   }
+}
+
+function trackProductClick(productId) {
+  API.submitFeedback(productId, "click", "product_card");
 }
 
 /* ── error banner ── */

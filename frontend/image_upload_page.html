@@ -255,15 +255,21 @@
     selectedFile = null;
   }
 
+  function setUploadButtonLoading(isLoading) {
+    const btn = document.getElementById('findSimilarBtn');
+    btn.disabled = isLoading;
+    btn.innerHTML = isLoading
+      ? `<span class="material-symbols-outlined animate-spin">progress_activity</span> Analysing…`
+      : `<span class="material-symbols-outlined">auto_awesome</span> Find Similar Items`;
+  }
+
   async function goToResults() {
     if (!selectedFile) {
       alert('Please select an image first.');
       return;
     }
 
-    const btn = document.getElementById('findSimilarBtn');
-    btn.disabled = true;
-    btn.innerHTML = `<span class="material-symbols-outlined animate-spin">progress_activity</span> Analysing…`;
+    setUploadButtonLoading(true);
 
     // Store file as base64 for system_feedback to pick up
     const reader = new FileReader();
@@ -274,13 +280,12 @@
 
     // Call backend with authentication
     try {
-      const data = await AUTH.uploadImage(selectedFile, 12);
+      const data = await AUTH.uploadImage(selectedFile, 12, 120000);
       
       // Check if there was an error in the response
       if (data.error) {
         console.error('Upload error:', data.error);
-        btn.disabled = false;
-        btn.innerHTML = `<span class="material-symbols-outlined">auto_awesome</span> Find Similar Items`;
+        setUploadButtonLoading(false);
         alert('Error: ' + data.error);
         return;
       }
@@ -289,8 +294,7 @@
       window.location.href = 'system_feedback.html';
     } catch (err) {
       console.error('Exception during upload:', err);
-      btn.disabled = false;
-      btn.innerHTML = `<span class="material-symbols-outlined">auto_awesome</span> Find Similar Items`;
+      setUploadButtonLoading(false);
       alert('Error: ' + (err.message || 'Failed to process image'));
     }
   }

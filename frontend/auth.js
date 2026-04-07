@@ -204,22 +204,30 @@ const AUTH = {
   /**
    * Upload image with authentication
    */
-  async uploadImage(file, topK = 8) {
+  async uploadImage(file, topK = 8, timeoutMs = 120000) {
     try {
       const formData = new FormData();
       formData.append("file", file);
 
       const token = AUTH.getToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-      const response = await fetch(
-        `${AUTH.API_BASE}/api/recommend/image?top_k=${topK}`,
-        {
-          method: "POST",
-          headers,
-          body: formData,
-        }
-      );
+      let response;
+      try {
+        response = await fetch(
+          `${AUTH.API_BASE}/api/recommend/image?top_k=${topK}`,
+          {
+            method: "POST",
+            headers,
+            body: formData,
+            signal: controller.signal,
+          }
+        );
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -235,6 +243,9 @@ const AUTH = {
 
       return await response.json();
     } catch (error) {
+      if (error.name === "AbortError") {
+        return { error: `Image upload timed out after ${Math.round(timeoutMs / 1000)} seconds.` };
+      }
       console.error("Upload image error:", error);
       return { error: error.message };
     }

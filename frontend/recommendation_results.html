@@ -74,15 +74,15 @@
       <div class="flex items-center gap-5">
         <div class="relative group">
           <div class="size-24 rounded-lg overflow-hidden border-4 border-white shadow-md">
-            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1IdejvWiZwGQMblnHMrMHk-K7ghwcJJAh11FomzTvA6ESMKVH_GIv2TzXb6hLOzdFnnkilfPZ3TPDX03D6bdPiK7bRvYUNrm34ssaKPmoUx1pfDFfvZGvcas6edH8vmFJ-Ra5pZOpSykvcji9N55zNSQUU1i3EMB_SkCx0XGDQgU0b4AuSq6up9shm6ooJas-1wR0C6qem2EfRlJp6EFyoWZQN05l40no-A8iMdyMIqIEdE131GSwJ2dZIn1oBNa91v01Nrn2YUw"/>
+            <img id="sourceImage" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1IdejvWiZwGQMblnHMrMHk-K7ghwcJJAh11FomzTvA6ESMKVH_GIv2TzXb6hLOzdFnnkilfPZ3TPDX03D6bdPiK7bRvYUNrm34ssaKPmoUx1pfDFfvZGvcas6edH8vmFJ-Ra5pZOpSykvcji9N55zNSQUU1i3EMB_SkCx0XGDQgU0b4AuSq6up9shm6ooJas-1wR0C6qem2EfRlJp6EFyoWZQN05l40no-A8iMdyMIqIEdE131GSwJ2dZIn1oBNa91v01Nrn2YUw"/>
           </div>
-          <div class="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Source</div>
+          <div id="analysisBadge" class="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">Source</div>
         </div>
         <div>
-          <h1 class="text-2xl font-bold mb-1">Results for your style</h1>
-          <p class="text-slate-500 flex items-center gap-2">
+          <h1 id="resultsTitle" class="text-2xl font-bold mb-1">Results for your style</h1>
+          <p id="analysisSummary" class="text-slate-500 flex items-center gap-2">
             <span class="material-symbols-outlined text-sm">auto_awesome</span>
-            AI analyzed your photo: Summer Dress, Vibrant Yellow, Cotton
+            AI analyzed your photo and found matching items.
           </p>
         </div>
       </div>
@@ -161,6 +161,31 @@
         if (stored) {
           try {
             const data = JSON.parse(stored);
+            const sourceImage = document.getElementById('sourceImage');
+            const analysisSummary = document.getElementById('analysisSummary');
+            const resultsTitle = document.getElementById('resultsTitle');
+            const analysisBadge = document.getElementById('analysisBadge');
+
+            const preview = sessionStorage.getItem('upload_preview');
+            if (preview) {
+              sourceImage.src = preview;
+            }
+
+            const heroParts = [];
+            if (data.skin_tone) heroParts.push(`Skin tone: ${data.skin_tone}`);
+            if (data.color) heroParts.push(`Color: ${data.color}`);
+            if (data.results && data.results[0] && data.results[0].name) {
+              heroParts.push(`Top match: ${data.results[0].name}`);
+            }
+
+            if (heroParts.length) {
+              analysisSummary.innerHTML = `<span class="material-symbols-outlined text-sm">auto_awesome</span> ${heroParts.join(' • ')}`;
+            }
+            if (data.skin_tone || data.color) {
+              resultsTitle.textContent = 'Results for your upload';
+              analysisBadge.textContent = 'Matched';
+            }
+
             if (data.results && data.results.length) {
               allResults = data.results;
               renderBatch(grid);

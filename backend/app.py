@@ -5,7 +5,7 @@ Integrates all backend modules into a REST API using MongoDB for data persistenc
 
 Setup:
   pip install fastapi uvicorn python-multipart scikit-learn numpy pandas
-              pillow opencv-python-headless tensorflow pymongo python-dotenv
+                                                        pillow opencv-python-headless tensorflow pymongo python-dotenv
 
 Run:
   python -m uvicorn app:app --reload --port 8000
@@ -26,12 +26,12 @@ from datetime import datetime
 import numpy as np
 import cv2
 from PIL import Image
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import KMeans
 from fastapi import FastAPI, File, UploadFile, Query, HTTPException, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 # MongoDB imports
 from database import (
@@ -39,8 +39,12 @@ from database import (
     close_mongodb,
     get_all_products,
     get_product_by_id,
+    get_products_by_ids,
     search_products,
     insert_recommendation,
+    insert_user_interaction,
+    normalize_user_id,
+    update_user,
     get_user_recommendations,
 )
 
@@ -58,36 +62,37 @@ from auth import (
     update_user_preferences,
 )
 
-# ── paths ──────────────────────────────────────────────────────────────────
-BASE_DIR   = Path(__file__).parent
-UPLOAD_DIR = BASE_DIR / "uploads"
-UPLOAD_DIR.mkdir(exist_ok=True)
-
 # ── lazy-load heavy assets ─────────────────────────────────────────────────
-_resnet     = None
+_resnet = None
 
 
 def get_resnet():
-    """Lazy-load ResNet50 only when needed (heavy import)."""
+    """Lazy-load TensorFlow ResNet50 only when needed."""
     global _resnet
     if _resnet is None:
         from tensorflow.keras.applications import ResNet50
         _resnet = ResNet50(weights="imagenet", include_top=False, pooling="avg")
     return _resnet
 
+# ── paths ──────────────────────────────────────────────────────────────────
+BASE_DIR   = Path(__file__).parent
+UPLOAD_DIR = BASE_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 # ── helper utilities ───────────────────────────────────────────────────────
 
 def extract_features_from_array(img_array: np.ndarray) -> np.ndarray:
     """Extract ResNet50 features from an RGB numpy array (H×W×3)."""
     from tensorflow.keras.applications.resnet50 import preprocess_input
-    img = Image.fromarray(img_array).resize((224, 224))
+
+    img = Image.fromarray(img_array).convert("RGB").resize((224, 224))
     arr = np.array(img, dtype=np.float32)
     arr = np.expand_dims(arr, axis=0)
     arr = preprocess_input(arr)
+
     model = get_resnet()
     features = model.predict(arr, verbose=0)
-    return features.flatten()
+    return features.flatten().astype(np.float32)
 
 
 def find_similar_items_mongo(query_vector: np.ndarray, top_k: int = 8) -> List[tuple]:
@@ -96,23 +101,55 @@ def find_similar_items_mongo(query_vector: np.ndarray, top_k: int = 8) -> List[t
     Returns list of (product_dict, similarity_score) tuples.
     """
     products = get_all_products(limit=50000)
-    
-    similarities = []
+
+    query_vector = np.asarray(query_vector, dtype=np.float32).reshape(-1)
+    query_norm = np.linalg.norm(query_vector)
+    if query_norm == 0:
+        return []
+
+    similarities: List[tuple] = []
+    batch_products: List[dict] = []
+    batch_embeddings: List[np.ndarray] = []
+    batch_size = 2048
+
+    def flush_batch() -> None:
+        nonlocal batch_products, batch_embeddings, similarities
+        if not batch_products:
+            return
+
+        embedding_matrix = np.stack(batch_embeddings).astype(np.float32)
+        embedding_norms = np.linalg.norm(embedding_matrix, axis=1)
+        valid_mask = embedding_norms > 0
+        if np.any(valid_mask):
+            normalized_embeddings = embedding_matrix[valid_mask] / embedding_norms[valid_mask, None]
+            scores = normalized_embeddings @ (query_vector / query_norm)
+            for product, score in zip(np.array(batch_products, dtype=object)[valid_mask], scores):
+                similarities.append((product, float(score)))
+
+        batch_products = []
+        batch_embeddings = []
+
     for product in products:
-        if "embedding" not in product:
+        embedding = product.get("embedding")
+        if embedding is None:
             continue
-        
+
         try:
-            embedding = np.array(product["embedding"])
-            score = cosine_similarity(
-                query_vector.reshape(1, -1),
-                embedding.reshape(1, -1)
-            )[0][0]
-            similarities.append((product, float(score)))
+            embedding_array = np.asarray(embedding, dtype=np.float32).reshape(-1)
         except Exception:
             continue
-    
-    # Sort by similarity and return top-k
+
+        if embedding_array.shape[0] != query_vector.shape[0]:
+            continue
+
+        batch_products.append(product)
+        batch_embeddings.append(embedding_array)
+
+        if len(batch_products) >= batch_size:
+            flush_batch()
+
+    flush_batch()
+
     similarities.sort(key=lambda x: x[1], reverse=True)
     return similarities[:top_k]
 
@@ -212,6 +249,113 @@ def product_to_dict(product: dict, similarity: float = 1.0) -> dict:
         "cluster":      int(product.get("cluster", 0) or 0),
         "similarity":   round(float(similarity), 4),
     }
+
+
+class RecommendationFeedback(BaseModel):
+    """Feedback payload used to learn user preferences over time."""
+    product_id: str
+    action: str  # click | like | dislike | save
+    source: Optional[str] = "recommendation_results"
+
+
+def _get_user_document(user_id: str) -> Optional[dict]:
+    """Resolve user document for both ObjectId and numeric IDs."""
+    from database import db
+    from bson.objectid import ObjectId
+
+    if db is None:
+        return None
+
+    try:
+        return db.users.find_one({"_id": ObjectId(user_id)})
+    except Exception:
+        try:
+            return db.users.find_one({"_id": int(user_id)})
+        except Exception:
+            return None
+
+
+def rerank_with_user_preferences(items: List[tuple], user_id: str) -> List[tuple]:
+    """Re-rank candidate products using each user's own profile and interaction history."""
+    from database import db
+
+    if db is None or not items:
+        return items
+
+    user_doc = _get_user_document(user_id)
+    preferred_colors = set(c.lower() for c in (user_doc or {}).get("preferred_colors", []))
+    preferred_types = set(t.lower() for t in (user_doc or {}).get("preferred_types", []))
+
+    interactions = list(db.user_interactions.find(
+        {"user_id": normalize_user_id(user_id)}
+    ).sort("created_at", -1).limit(300))
+
+    liked_ids = {str(i.get("product_id")) for i in interactions if i.get("action") in ["like", "save", "click"]}
+    disliked_ids = {str(i.get("product_id")) for i in interactions if i.get("action") == "dislike"}
+
+    reranked: List[tuple] = []
+    for product, base_score in items:
+        score = float(base_score)
+        product_id = str(product.get("_id", ""))
+        product_type = str(product.get("product_type", "")).lower()
+        product_color = str(product.get("colour", "")).lower()
+
+        if product_type and product_type in preferred_types:
+            score += 0.08
+        if product_color and product_color in preferred_colors:
+            score += 0.06
+        if product_id in liked_ids:
+            score += 0.12
+        if product_id in disliked_ids:
+            score -= 0.15
+
+        reranked.append((product, score))
+
+    reranked.sort(key=lambda x: x[1], reverse=True)
+    return reranked
+
+
+def learn_from_feedback(user_id: str, product_id: str, action: str) -> None:
+    """Persist interaction and gradually update user preferences."""
+    action = action.lower().strip()
+    if action not in {"click", "like", "dislike", "save"}:
+        return
+
+    insert_user_interaction({
+        "user_id": user_id,
+        "product_id": product_id,
+        "action": action,
+        "created_at": datetime.utcnow(),
+    })
+
+    if action not in {"click", "like", "save"}:
+        return
+
+    product = get_product_by_id(product_id)
+    if not product:
+        return
+
+    user_doc = _get_user_document(user_id)
+    if not user_doc:
+        return
+
+    update_ops = {
+        "$inc": {"interaction_count": 1},
+    }
+
+    color = str(product.get("colour", "")).strip().lower()
+    ptype = str(product.get("product_type", "")).strip().lower()
+
+    add_to_set = {}
+    if color:
+        add_to_set["preferred_colors"] = color
+    if ptype:
+        add_to_set["preferred_types"] = ptype
+
+    if add_to_set:
+        update_ops["$addToSet"] = add_to_set
+
+    update_user(str(user_doc.get("_id")), update_ops)
 
 
 # ── FastAPI app ────────────────────────────────────────────────────────────
@@ -374,19 +518,25 @@ async def recommend_by_image(
         features = extract_features_from_array(img_arr)
         similar_items = find_similar_items_mongo(features, top_k)
 
+        # Personalize ranking with this specific user's history/preferences.
+        if current_user and current_user.get("user_id"):
+            similar_items = rerank_with_user_preferences(similar_items, current_user.get("user_id"))
+
         products = [product_to_dict(prod, score) for prod, score in similar_items]
 
         # Save to user's recommendation history if authenticated
         if current_user:
             try:
+                normalized_user_id = normalize_user_id(current_user.get("user_id"))
                 insert_recommendation({
-                    "user_id": current_user.get("user_id"),
+                    "user_id": normalized_user_id,
                     "type": "image",
                     "skin_tone": skin_tone,
                     "color": color,
                     "product_ids": [p["id"] for p in products],
                     "created_at": datetime.utcnow(),
                 })
+                update_user(normalized_user_id, {"$inc": {"recommendation_count": 1}})
             except:
                 pass  # Silently fail if history save fails
 
@@ -411,6 +561,7 @@ def recommend_by_text(
     product_type: str = Query(..., description="e.g. dress, kurta, shirt"),
     color:        str = Query("", description="e.g. red, blue, black"),
     top_k:        int = Query(8, ge=1, le=50),
+    current_user: dict = Depends(get_current_user_optional),
 ):
     """
     Filter by product_type & color, return similar items.
@@ -437,6 +588,9 @@ def recommend_by_text(
         if "embedding" in first_product:
             embedding = np.array(first_product["embedding"])
             similar_items = find_similar_items_mongo(embedding, top_k + 1)
+
+            if current_user and current_user.get("user_id"):
+                similar_items = rerank_with_user_preferences(similar_items, current_user.get("user_id"))
             
             # Filter out the query product itself
             filtered = [
@@ -446,6 +600,23 @@ def recommend_by_text(
             results = [product_to_dict(prod, score) for prod, score in filtered[:top_k]]
         else:
             results = [product_to_dict(p) for p in products[:top_k]]
+
+        if current_user and current_user.get("user_id"):
+            try:
+                normalized_user_id = normalize_user_id(current_user.get("user_id"))
+                insert_recommendation({
+                    "user_id": normalized_user_id,
+                    "type": "text",
+                    "query": {
+                        "product_type": product_type.lower(),
+                        "color": color.lower() if color else "",
+                    },
+                    "product_ids": [p["id"] for p in results],
+                    "created_at": datetime.utcnow(),
+                })
+                update_user(normalized_user_id, {"$inc": {"recommendation_count": 1}})
+            except Exception:
+                pass
 
         return {"status": "success", "results": results, "total": len(results)}
 
@@ -647,6 +818,33 @@ def get_history(
                 }
                 for rec in recommendations
             ]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(500, str(e))
+
+
+@app.post("/api/recommend/feedback")
+def submit_feedback(
+    payload: RecommendationFeedback,
+    current_user: dict = Depends(get_current_user),
+):
+    """Capture user feedback so future recommendations improve per user."""
+    try:
+        user_id = current_user.get("user_id")
+        if not user_id:
+            raise HTTPException(401, "Unauthorized")
+
+        learn_from_feedback(user_id, payload.product_id, payload.action)
+
+        return {
+            "status": "success",
+            "message": "Feedback recorded",
+            "action": payload.action.lower().strip(),
+            "product_id": payload.product_id,
+            "source": payload.source,
         }
     except HTTPException:
         raise
