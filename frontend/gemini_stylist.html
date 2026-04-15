@@ -26,6 +26,7 @@
 </head>
 <body class="bg-background-light text-slate-900 antialiased">
 <script src="auth.js"></script>
+<script src="layout.js"></script>
 <script>
   window.addEventListener('load', function() {
     if (!AUTH.isAuthenticated()) {
@@ -37,33 +38,31 @@
 <div class="layout-container flex h-full grow flex-col">
 
 <!-- Navigation Header -->
-<header class="flex items-center justify-between whitespace-nowrap border-b border-primary/10 px-6 md:px-20 py-4 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-  <div class="flex items-center gap-8">
-    <a href="index.html" class="flex items-center gap-3 text-primary">
-      <div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg">
-        <span class="material-symbols-outlined text-primary">auto_awesome</span>
-      </div>
-      <h2 class="text-slate-900 text-xl font-bold leading-tight tracking-tight">Gemini Fashion</h2>
-    </a>
-    <nav class="hidden lg:flex items-center gap-6">
-      <a class="text-sm font-medium text-slate-600 hover:text-primary transition-colors" href="index.html">Home</a>
-      <a class="text-sm font-medium text-slate-600 hover:text-primary transition-colors" href="image_upload_page.html">Upload</a>
-      <a class="text-sm font-medium text-slate-600 hover:text-primary transition-colors" href="browse_products.html">Browse</a>
-      <a class="text-sm font-medium text-slate-600 hover:text-primary transition-colors" href="my_wardrobe.html">My Wardrobe</a>
-      <a class="text-sm font-medium text-primary border-b-2 border-primary pb-1" href="gemini_stylist.html">AI Stylist</a>
-    </nav>
-  </div>
+<header class="flex items-center justify-between border-b border-primary/10 bg-white/80 backdrop-blur-md px-6 py-4 lg:px-20 fixed top-0 left-0 right-0 z-50">
   <div class="flex items-center gap-3">
-    <button class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-neutral-light text-slate-700 hover:bg-primary/10 transition-colors">
-      <span class="material-symbols-outlined">search</span>
+    <a href="index.html" class="flex items-center gap-3">
+      <div class="bg-primary p-2 rounded-lg text-white"><span class="material-symbols-outlined">apparel</span></div>
+      <h2 class="text-slate-900 text-xl font-bold tracking-tight">DressMate</h2>
+    </a>
+  </div>
+  <nav class="hidden md:flex items-center gap-10">
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="index.html">Home</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="image_upload_page.html">Upload</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="browse_products.html">Browse</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="style_match.html">Style Match</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="my_wardrobe.html">My Wardrobe</a>
+    <a class="text-primary transition-colors text-sm font-medium border-b-2 border-primary" href="gemini_stylist.html">AI Stylist</a>
+  </nav>
+  <div class="flex items-center gap-4">
+    <button onclick="document.querySelector('#mobile-menu').classList.toggle('hidden')" class="md:hidden flex items-center justify-center rounded-full size-10 text-slate-500 hover:bg-slate-100 transition-colors">
+      <span class="material-symbols-outlined">menu</span>
     </button>
-    <button class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-neutral-light text-slate-700 hover:bg-primary/10 transition-colors">
+    <button class="p-2 text-slate-600 hover:bg-primary/10 rounded-full transition-colors">
       <span class="material-symbols-outlined">notifications</span>
     </button>
-    <div class="h-8 w-px bg-slate-200 mx-1"></div>
     <div class="relative">
-      <div class="size-8 rounded-full overflow-hidden border border-slate-200 cursor-pointer hover:border-primary/50 transition-all" id="userButton" onclick="toggleUserDropdown()">
-        <img alt="User profile" class="w-full h-full object-cover" id="userAvatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA35itP53cb1hbKAj8GP4aN_q6w1HwV3MGqZVBqMfXIaDejVHJW7samAyRTXmvFqDCjfJ7Dzo1FtYz2_Ez09zHD9GSo7Vmu8RWf4RNVic_2hMzx1Jm2DOIwqFOd2cPmM25PCwAn79j515ed_SFcKrAghfX_BFgqKY-NMJtRUm324X7BHuU2vYzAH6nzuL2SEgYynddnWlM45SUWOkPBy-hD1o0HAtgDtbRs84HWITG-wvhNlPyClD5Nu02NOBcC5Ou2gG6J0qlyQU0"/>
+      <div class="h-10 w-10 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary/50 transition-all" id="userButton" onclick="toggleUserDropdown()">
+        <img class="h-full w-full object-cover" id="userAvatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnUD9HujDAWz7PJzUXTfZ5VjFRX7QkPsjJvxU_6s5sNwSwDyJI5PF6EtvddtWvlDXqwKapy4Tm6oTyde7kgJNc7vsWP5lLokE0IL9ISSRZcERAJ6W7XT-tZxwOKfUWzr1YFhR2bL-p-KwrgGZbpjNHjq7YCEVQipI3rzwgp9sVFZj6LgMNztE6ebPp0Wq-YYQEhgsAbLXUIen4P4IzwKxhck9x-6F-dy8V8AXhLxWLwku8u58MYPxu_GLZQ5byIVw9AL_te1-Q900"/>
       </div>
       <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
         <div class="px-4 py-2 border-b border-slate-100">
@@ -71,18 +70,30 @@
           <p class="text-xs text-slate-500" id="userEmailDropdown">email@example.com</p>
         </div>
         <a href="dashboard.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</a>
+        <a href="my_wardrobe.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">My Wardrobe</a>
         <button onclick="AUTH.logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
       </div>
     </div>
   </div>
 </header>
 
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-b border-primary/10 px-6 py-4 flex flex-col gap-3">
+  <a class="text-slate-700 hover:text-primary text-sm font-medium" href="index.html">Home</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-medium" href="image_upload_page.html">Upload</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-medium" href="browse_products.html">Browse</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-medium" href="style_match.html">Style Match</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-medium" href="my_wardrobe.html">My Wardrobe</a>
+  <a class="text-primary font-bold text-sm" href="gemini_stylist.html">AI Stylist</a>
+</div>
+
 <!-- Main Chat Area -->
-<main class="flex flex-1 justify-center py-6 md:py-10 px-4">
+<main class="flex flex-1 justify-center py-6 md:py-10 px-4 pb-40">
 <script src="api.js"></script>
 <script>
   function toggleUserDropdown() {
     const dropdown = document.getElementById('userDropdown');
+    if (!dropdown) return;
     dropdown.classList.toggle('hidden');
     document.addEventListener('click', function closeDropdown(e) {
       if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
@@ -95,8 +106,10 @@
   window.addEventListener('load', function() {
     const profile = AUTH.getProfile();
     if (profile) {
-      document.getElementById('userNameDropdown').textContent = profile.name || 'User';
-      document.getElementById('userEmailDropdown').textContent = profile.email || 'email@example.com';
+      const nameNode = document.getElementById('userNameDropdown');
+      const emailNode = document.getElementById('userEmailDropdown');
+      if (nameNode) nameNode.textContent = profile.name || 'User';
+      if (emailNode) emailNode.textContent = profile.email || 'email@example.com';
     }
   });
 </script>
@@ -166,31 +179,33 @@
     </div>
 
     <!-- Input Area -->
-    <div class="sticky bottom-6 mt-auto">
-      <div class="flex items-center px-4 py-4 gap-3 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-primary/10">
-        <div class="bg-primary/10 rounded-full size-10 shrink-0 flex items-center justify-center overflow-hidden border border-primary/5">
-          <img alt="User avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn_xn8Swcs54uTPvYpzXfL6PySgaN3_xgQUNOukalazJV3pjEKlEeVLW4srL7Xb2Sf1FUId_-SZALhOOZlt8eAGOBsMyHR9anYsmnn93ShXYLhCrjGxc4SZ2scr3LpntuJKfK7HWmc_uXdIrq13-F7weWNWhkMyrN4ZqEWWsW8QcFLRXvQfGiH0AYq0c-2AIgIY-RusTS-HqraydmnCLAjPoFJkoyiSI8eMllct8b2CtzVUUHJ8WGp5hN3X7WHPPPlxXu7wd_SKQA"/>
-        </div>
-        <div class="flex flex-col min-w-0 flex-1 relative">
-          <div class="flex w-full items-center bg-neutral-light rounded-xl px-4 h-14 transition-all focus-within:ring-2 focus-within:ring-primary/40">
-            <input id="chatInput" class="flex w-full bg-transparent border-none focus:ring-0 text-slate-900 placeholder:text-slate-400 text-base" placeholder="Ask your fashion stylist..." onkeydown="if(event.key==='Enter') sendMessage()"/>
-            <div class="flex items-center gap-1 ml-2">
-              <label class="p-2 text-slate-400 hover:text-primary transition-colors cursor-pointer" title="Upload Image">
-                <span class="material-symbols-outlined">image</span>
-                <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(this)"/>
-              </label>
-              <button class="p-2 text-slate-400 hover:text-primary transition-colors" title="Attach Files">
-                <span class="material-symbols-outlined">attach_file</span>
-              </button>
-              <button onclick="sendMessage()" class="ml-2 bg-primary hover:bg-primary/90 text-white rounded-lg px-5 py-2 font-semibold text-sm transition-all shadow-lg flex items-center gap-2">
-                <span>Send</span>
-                <span class="material-symbols-outlined text-sm">send</span>
-              </button>
+    <div class="fixed bottom-6 left-0 right-0 z-40 px-4">
+      <div class="max-w-4xl mx-auto">
+        <div class="flex items-center px-4 py-4 gap-3 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-primary/10">
+          <div class="bg-primary/10 rounded-full size-10 shrink-0 flex items-center justify-center overflow-hidden border border-primary/5">
+            <img alt="User avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn_xn8Swcs54uTPvYpzXfL6PySgaN3_xgQUNOukalazJV3pjEKlEeVLW4srL7Xb2Sf1FUId_-SZALhOOZlt8eAGOBsMyHR9anYsmnn93ShXYLhCrjGxc4SZ2scr3LpntuJKfK7HWmc_uXdIrq13-F7weWNWhkMyrN4ZqEWWsW8QcFLRXvQfGiH0AYq0c-2AIgIY-RusTS-HqraydmnCLAjPoFJkoyiSI8eMllct8b2CtzVUUHJ8WGp5hN3X7WHPPPlxXu7wd_SKQA"/>
+          </div>
+          <div class="flex flex-col min-w-0 flex-1 relative">
+            <div class="flex w-full items-center bg-neutral-light rounded-xl px-4 h-14 transition-all focus-within:ring-2 focus-within:ring-primary/40">
+              <input id="chatInput" class="flex w-full bg-transparent border-none focus:ring-0 text-slate-900 placeholder:text-slate-400 text-base" placeholder="Ask your fashion stylist..." onkeydown="if(event.key==='Enter') sendMessage()"/>
+              <div class="flex items-center gap-1 ml-2">
+                <label class="p-2 text-slate-400 hover:text-primary transition-colors cursor-pointer" title="Upload Image">
+                  <span class="material-symbols-outlined">image</span>
+                  <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(this)"/>
+                </label>
+                <button class="p-2 text-slate-400 hover:text-primary transition-colors" title="Attach Files">
+                  <span class="material-symbols-outlined">attach_file</span>
+                </button>
+                <button onclick="sendMessage()" class="ml-2 bg-primary hover:bg-primary/90 text-white rounded-lg px-5 py-2 font-semibold text-sm transition-all shadow-lg flex items-center gap-2">
+                  <span>Send</span>
+                  <span class="material-symbols-outlined text-sm">send</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
+        <p class="text-center text-[10px] text-slate-400 mt-3 font-medium uppercase tracking-[0.2em]">Powered by Gemini AI Engine</p>
       </div>
-      <p class="text-center text-[10px] text-slate-400 mt-3 font-medium uppercase tracking-[0.2em]">Powered by Gemini AI Engine</p>
     </div>
 
   </div>
@@ -212,21 +227,76 @@
     "I've analyzed the style and color—this dress works wonderfully for formal events. For outdoor galas, consider a light wrap. For indoor events, you can go more minimal and let the fabric do the talking.",
   ];
   let aiIdx = 0;
+  let chatHistory = [];  // Store conversation history
 
-  function sendMessage() {
+  async function sendMessage() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     if (!text) return;
+
     addUserMessage(text);
     input.value = '';
-    setTimeout(() => addAIMessage(aiResponses[aiIdx % aiResponses.length]), 800);
-    aiIdx++;
+    setInputLoading(true);
+
+    try {
+      // Add user message to history
+      chatHistory.push({ role: 'user', content: text });
+
+      // Send to backend with history
+      const response = await AUTH.chat(text, JSON.stringify(chatHistory));
+      setInputLoading(false);
+
+      if (response.error) {
+        addAIMessage(`❌ Error: ${response.error}`);
+      } else {
+        // Add AI response to history
+        chatHistory.push({ role: 'assistant', content: response.response });
+        addAIMessage(response.response);
+      }
+    } catch (err) {
+      setInputLoading(false);
+      addAIMessage(`❌ Failed to get response: ${err.message}`);
+    }
   }
 
-  function sendQuickReply(btn) {
-    addUserMessage(btn.textContent.trim());
-    setTimeout(() => addAIMessage(aiResponses[aiIdx % aiResponses.length]), 800);
-    aiIdx++;
+  async function sendQuickReply(btn) {
+    const text = btn.textContent.trim();
+    addUserMessage(text);
+    setInputLoading(true);
+
+    try {
+      // Add to history
+      chatHistory.push({ role: 'user', content: text });
+
+      // Send to backend with history
+      const response = await AUTH.chat(text, JSON.stringify(chatHistory));
+      setInputLoading(false);
+
+      if (response.error) {
+        addAIMessage(`❌ Error: ${response.error}`);
+      } else {
+        // Add to history
+        chatHistory.push({ role: 'assistant', content: response.response });
+        addAIMessage(response.response);
+      }
+    } catch (err) {
+      setInputLoading(false);
+      addAIMessage(`❌ Failed to get response: ${err.message}`);
+    }
+  }
+
+  function setInputLoading(isLoading) {
+    const input = document.getElementById('chatInput');
+    const sendBtn = document.querySelector('button[onclick*="sendMessage"]');
+    if (isLoading) {
+      input.disabled = true;
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Thinking...';
+    } else {
+      input.disabled = false;
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = '<span>Send</span><span class="material-symbols-outlined text-sm">send</span>';
+    }
   }
 
   function addUserMessage(text) {
@@ -246,6 +316,10 @@
 
   function addAIMessage(text) {
     const msgs = document.getElementById('chatMessages');
+
+    // Parse and render markdown
+    const formattedText = parseMarkdown(text);
+
     msgs.innerHTML += `
       <div class="flex items-start gap-4">
         <div class="bg-primary/20 flex items-center justify-center rounded-full size-10 shrink-0 border border-primary/20">
@@ -253,10 +327,53 @@
         </div>
         <div class="flex flex-1 flex-col gap-1.5 items-start">
           <p class="text-slate-500 text-xs font-semibold uppercase tracking-wider ml-1">Gemini AI</p>
-          <div class="text-base leading-relaxed max-w-[85%] rounded-2xl rounded-tl-none px-5 py-4 bg-white text-slate-800 shadow-sm border border-slate-100">${text}</div>
+          <div class="text-base leading-relaxed max-w-[85%] rounded-2xl rounded-tl-none px-5 py-4 bg-white text-slate-800 shadow-sm border border-slate-100 prose prose-sm max-w-none">
+            ${formattedText}
+          </div>
         </div>
       </div>`;
     scrollChat();
+  }
+
+  function parseMarkdown(text) {
+    if (!text) return '';
+
+    // Escape HTML
+    let result = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Bold: **text** or __text__
+    result = result.replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>');
+    result = result.replace(/__(.+?)__/g, '<strong class="font-bold text-slate-900">$1</strong>');
+
+    // Italic: *text* or _text_
+    result = result.replace(/\*(.+?)\*/g, '<em class="italic text-slate-700">$1</em>');
+    result = result.replace(/_(.+?)_/g, '<em class="italic text-slate-700">$1</em>');
+
+    // Headings: ### text
+    result = result.replace(/###\s+(.+?)(\n|$)/g, '<h3 class="text-lg font-bold text-slate-900 mt-3 mb-2">$1</h3>');
+    result = result.replace(/##\s+(.+?)(\n|$)/g, '<h2 class="text-xl font-bold text-slate-900 mt-3 mb-2">$1</h2>');
+
+    // Line breaks
+    result = result.replace(/\n\n/g, '</p><p class="mt-3">');
+    result = '<p>' + result + '</p>';
+
+    // Bullet points: - item
+    result = result.replace(/^[\s]*-\s+(.+?)$/gm, '<li class="ml-4 list-disc">$1</li>');
+    result = result.replace(/(<li.*?<\/li>)/s, '<ul class="list-inside space-y-1 my-2">$1</ul>');
+
+    // Numbers: 1. item
+    result = result.replace(/^\s*\d+\.\s+(.+?)$/gm, '<li class="ml-4 list-decimal">$1</li>');
+    result = result.replace(/(<li class="ml-4 list-decimal">.*?<\/li>)/s, function(match) {
+      return '<ol class="list-inside space-y-1 my-2">' + match + '</ol>';
+    });
+
+    // Code blocks: `code`
+    result = result.replace(/`(.+?)`/g, '<code class="bg-slate-100 px-2 py-1 rounded text-sm font-mono text-slate-800">$1</code>');
+
+    return result;
   }
 
   function scrollChat() {
@@ -287,5 +404,8 @@
     };
     reader.readAsDataURL(file);
   }
+</script>
+<script>
+  initSharedPage({ activeNav: "stylist", requireAuth: true });
 </script>
 </body></html>

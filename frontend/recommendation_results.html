@@ -21,51 +21,56 @@
 </head>
 <body class="bg-background-light font-display text-slate-900 antialiased">
 <script src="auth.js"></script>
+<script src="layout.js"></script>
 <!-- Navigation -->
-<header class="sticky top-0 z-50 bg-background-light/80 backdrop-blur-md border-b border-primary/10 px-4 md:px-10 py-3">
-  <div class="max-w-7xl mx-auto flex items-center justify-between">
-    <div class="flex items-center gap-8">
-      <a class="flex items-center gap-3" href="index.html">
-        <div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
-          <span class="material-symbols-outlined text-2xl">architecture</span>
-        </div>
-        <h2 class="text-xl font-bold tracking-tight">Fashion AI</h2>
-      </a>
-      <nav class="hidden md:flex items-center gap-6">
-        <a class="text-sm font-semibold hover:text-primary transition-colors" href="index.html">Home</a>
-        <a class="text-sm font-semibold hover:text-primary transition-colors" href="image_upload_page.html">Upload</a>
-        <a class="text-sm font-semibold text-primary" href="browse_products.html">Browse</a>
-        <a class="text-sm font-semibold hover:text-primary transition-colors" href="my_wardrobe.html">My Wardrobe</a>
-        <a class="text-sm font-semibold hover:text-primary transition-colors" href="gemini_stylist.html">AI Stylist</a>
-      </nav>
-    </div>
-    <div class="flex items-center gap-4 flex-1 justify-end max-w-md ml-4">
-      <div class="relative w-full hidden sm:block">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-        <input class="w-full bg-primary/5 border-none rounded-xl py-2 pl-10 pr-4 focus:ring-2 focus:ring-primary/50 text-sm" placeholder="Search trends..." type="text"/>
+<header class="flex items-center justify-between border-b border-primary/10 bg-white/80 backdrop-blur-md px-6 py-4 lg:px-20 sticky top-0 z-50">
+  <div class="flex items-center gap-3">
+    <a href="index.html" class="flex items-center gap-3">
+      <div class="bg-primary p-2 rounded-lg text-white"><span class="material-symbols-outlined">apparel</span></div>
+      <h2 class="text-slate-900 text-xl font-bold tracking-tight">DressMate</h2>
+    </a>
+  </div>
+  <nav class="hidden md:flex items-center gap-10">
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="index.html">Home</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="image_upload_page.html">Upload</a>
+    <a class="text-primary transition-colors text-sm font-medium border-b-2 border-primary" href="browse_products.html">Browse</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="style_match.html">Style Match</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="my_wardrobe.html">My Wardrobe</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="gemini_stylist.html">AI Stylist</a>
+  </nav>
+  <div class="flex items-center gap-4">
+    <button onclick="document.querySelector('#mobile-menu').classList.toggle('hidden')" class="md:hidden flex items-center justify-center rounded-full size-10 text-slate-500 hover:bg-slate-100 transition-colors">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <button class="p-2 text-slate-600 hover:bg-primary/10 rounded-full transition-colors">
+      <span class="material-symbols-outlined">notifications</span>
+    </button>
+    <div class="relative">
+      <div class="h-10 w-10 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center overflow-hidden cursor-pointer hover:border-primary/50 transition-all" id="userButton" onclick="toggleUserDropdown()">
+        <img class="h-full w-full object-cover" id="userAvatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnUD9HujDAWz7PJzUXTfZ5VjFRX7QkPsjJvxU_6s5sNwSwDyJI5PF6EtvddtWvlDXqwKapy4Tm6oTyde7kgJNc7vsWP5lLokE0IL9ISSRZcERAJ6W7XT-tZxwOKfUWzr1YFhR2bL-p-KwrgGZbpjNHjq7YCEVQipI3rzwgp9sVFZj6LgMNztE6ebPp0Wq-YYQEhgsAbLXUIen4P4IzwKxhck9x-6F-dy8V8AXhLxWLwku8u58MYPxu_GLZQ5byIVw9AL_te1-Q900"/>
       </div>
-      <div class="flex items-center gap-3">
-        <button class="p-2 text-slate-400 hover:text-primary transition-colors relative">
-          <span class="material-symbols-outlined">notifications</span>
-          <span class="absolute top-2 right-2 size-2 bg-primary rounded-full"></span>
-        </button>
-        <div class="relative">
-          <div class="size-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary/10 cursor-pointer hover:border-primary/50 transition-all" id="userButton" onclick="toggleUserDropdown()">
-            <img class="w-full h-full object-cover" id="userAvatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtznFeJGuVqoyONo15k841njdBjOvPAY78FoEuCxkR7l9EHP_C-fcZag-o3fMbYH948OsqA9YccljbtKiPreEg7X_W92j0_VtquhYep_ETPeJpgJ43NJHXGTrcUWQWBMIXGQutZ9mJY8M9wXjKRHI0abv43B9H8Q6xFE0D8QIu5-2cptq7Ty64rXC6mRAJl_wEdxTVIMH5lYaUIp-qM7BtZ6OfWSMPL8pA7pN_x2p7jEC5Lw3WUShZG4qWfygsIbLglNbGviABOmw"/>
-          </div>
-          <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
-            <div class="px-4 py-2 border-b border-slate-100">
-              <p class="text-sm font-semibold text-slate-900" id="userNameDropdown">User</p>
-              <p class="text-xs text-slate-500" id="userEmailDropdown">email@example.com</p>
-            </div>
-            <a href="dashboard.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</a>
-            <button onclick="AUTH.logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
-          </div>
+      <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
+        <div class="px-4 py-2 border-b border-slate-100">
+          <p class="text-sm font-semibold text-slate-900" id="userNameDropdown">User</p>
+          <p class="text-xs text-slate-500" id="userEmailDropdown">email@example.com</p>
         </div>
+        <a href="dashboard.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</a>
+        <a href="my_wardrobe.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">My Wardrobe</a>
+        <button onclick="AUTH.logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
       </div>
     </div>
   </div>
 </header>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-white border-b border-primary/10 px-6 py-4 flex flex-col gap-3">
+  <a class="text-slate-700 hover:text-primary text-sm font-medium" href="index.html">Home</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-medium" href="image_upload_page.html">Upload</a>
+  <a class="text-primary font-bold text-sm" href="browse_products.html">Browse</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-medium" href="style_match.html">Style Match</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-medium" href="my_wardrobe.html">My Wardrobe</a>
+  <a class="text-slate-700 hover:text-primary text-sm font-medium" href="gemini_stylist.html">AI Stylist</a>
+</div>
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
   <!-- Context Section -->
@@ -114,7 +119,7 @@
       <div>
         <label class="text-xs font-bold uppercase text-slate-400 mb-2 block">Style</label>
         <select class="w-full rounded-lg border-slate-200 text-sm focus:ring-primary focus:border-primary">
-          <option>All</option><option>Casual</option><option>Formal</option><option>Boho</option>
+          <option>All</option><option>Casual</option><option>Formal</option><option>Ethnic</option><option>Kurta</option><option>Boho</option>
         </select>
       </div>
       <div class="flex items-end">
@@ -129,8 +134,11 @@
     <!-- Cards with click-through to product detail -->
     <script src="api.js"></script>
     <script>
+      initSharedPage({ activeNav: "browse", requireAuth: true });
+
       function toggleUserDropdown() {
         const dropdown = document.getElementById('userDropdown');
+        if (!dropdown) return;
         dropdown.classList.toggle('hidden');
         document.addEventListener('click', function closeDropdown(e) {
           if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
@@ -143,8 +151,10 @@
       window.addEventListener('load', function() {
         const profile = AUTH.getProfile();
         if (profile) {
-          document.getElementById('userNameDropdown').textContent = profile.name || 'User';
-          document.getElementById('userEmailDropdown').textContent = profile.email || 'email@example.com';
+          const nameNode = document.getElementById('userNameDropdown');
+          const emailNode = document.getElementById('userEmailDropdown');
+          if (nameNode) nameNode.textContent = profile.name || 'User';
+          if (emailNode) emailNode.textContent = profile.email || 'email@example.com';
         }
       });
 

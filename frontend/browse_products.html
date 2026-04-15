@@ -1,327 +1,188 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: { "primary": "#994ce6", "background-light": "#f7f6f8", "background-dark": "#191121" },
-        fontFamily: { "display": ["Inter"] },
-        borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DressMate - Browse Products</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#994ce6",
+            "background-light": "#f7f6f8",
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+        },
       },
-    },
-  }
-</script>
-<title>DressMate - Browse Products</title>
+    };
+  </script>
+  <style>
+    body { font-family: "Inter", sans-serif; }
+  </style>
 </head>
-<body class="font-display bg-background-light text-slate-900">
-<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<body class="bg-background-light text-slate-900 min-h-screen">
+  <script src="auth.js"></script>
+  <script src="layout.js"></script>
 
-<header class="sticky top-0 z-50 w-full border-b border-primary/10 bg-white/80 backdrop-blur-md px-6 md:px-10 py-3">
-  <div class="max-w-7xl mx-auto flex items-center justify-between">
-    <div class="flex items-center gap-8">
+  <!-- Navigation Bar -->
+  <header class="flex items-center justify-between border-b border-primary/10 bg-white/80 backdrop-blur-md px-6 py-4 lg:px-20 fixed top-0 left-0 right-0 z-50">
+    <div class="flex items-center gap-3">
       <a href="index.html" class="flex items-center gap-3">
-        <div class="flex items-center justify-center size-10 rounded-lg bg-primary text-white">
-          <span class="material-symbols-outlined">auto_awesome</span>
-        </div>
-        <h1 class="text-xl font-bold tracking-tight">DressMate</h1>
+        <div class="bg-primary p-2 rounded-lg text-white"><span class="material-symbols-outlined">apparel</span></div>
+        <h2 class="text-slate-900 text-xl font-bold tracking-tight">DressMate</h2>
       </a>
-      <nav class="hidden lg:flex items-center gap-6">
-        <a class="text-sm font-medium hover:text-primary transition-colors" href="index.html">Home</a>
-        <a class="text-sm font-medium hover:text-primary transition-colors" href="image_upload_page.html">Upload</a>
-        <a class="text-sm font-bold text-primary transition-colors" href="browse_products.html">Browse</a>
-        <a class="text-sm font-medium hover:text-primary transition-colors" href="my_wardrobe.html">My Wardrobe</a>
-        <a class="text-sm font-medium hover:text-primary transition-colors" href="gemini_stylist.html">AI Stylist</a>
-      </nav>
     </div>
-    <div class="flex items-center gap-4 flex-1 justify-end max-w-md ml-4">
-      <div class="relative w-full hidden sm:block">
-        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-        <input class="w-full bg-primary/5 border-none rounded-xl py-2 pl-10 pr-4 focus:ring-2 focus:ring-primary/20 text-sm" placeholder="Search styles..." type="text"/>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="p-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary">
-          <span class="material-symbols-outlined">shopping_bag</span>
-        </button>
-        <a href="my_wardrobe.html" class="p-2 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary">
-          <span class="material-symbols-outlined">favorite</span>
-        </a>
-        <div class="relative">
-          <div id="userButton" class="size-10 rounded-full bg-slate-200 overflow-hidden border-2 border-primary/20 hover:border-primary/50 transition-all cursor-pointer" onclick="toggleUserDropdown()">
-            <img class="w-full h-full object-cover" id="userAvatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBP1EDlVwD0d1mdaTiqwB2nGCZ7YA-VncMS4siBR49_Tw7BUZj2K3tvfcZCi6RKVMx11x3DO5gA2hQMW3HO0GMvxKIIx0DKhsmYeusVB3rj2FYdRdvYzfv_IZW3Vtj6DJ-GilTUbmp4K6fIMNmbM7tPyKNLC0dHd7lM-K24m3EHLB5C6sC7hCtqqoyDTdgTLQbGYxVbBceNnxv6q3JnNXdru2LcaTS3RRh3qpPKi4EGYohsOiS8Avwwo9rJ_UGBdta8G3CNW_3Y2Y"/>
+    <nav class="hidden md:flex items-center gap-10">
+      <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="index.html">Home</a>
+      <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="image_upload_page.html">Upload</a>
+      <a class="text-sm font-medium transition-colors text-primary border-b-2 border-primary" href="browse_products.html">Browse</a>
+      <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="style_match.html">Style Match</a>
+      <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="my_wardrobe.html">My Wardrobe</a>
+      <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="gemini_stylist.html">AI Stylist</a>
+    </nav>
+    <div class="flex items-center gap-4">
+      <button id="sharedMenuButton" class="md:hidden flex items-center justify-center rounded-full size-10 text-slate-500 hover:bg-slate-100 transition-colors">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div class="relative">
+        <button id="sharedUserButton" class="h-10 w-10 rounded-full bg-primary/15 border-2 border-primary/25 flex items-center justify-center text-primary font-bold hover:border-primary/50 transition-all">U</button>
+        <div id="sharedUserDropdown" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg py-2 z-40 hidden border border-slate-100">
+          <div class="px-4 py-2 border-b border-slate-100">
+            <p class="text-sm font-semibold text-slate-900">User</p>
+            <p class="text-xs text-slate-500">Sign in to save your style</p>
           </div>
-          <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 z-40 hidden" id="userDropdown">
-            <div class="px-4 py-2 border-b border-slate-100" id="userDropdownContent">
-              <p class="text-sm font-semibold text-slate-900"><a href="login.html">Sign In</a></p>
-            </div>
-            <a href="my_wardrobe.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">My Wardrobe</a>
-          </div>
+          <button id="sharedLoginBtn" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Login</button>
         </div>
       </div>
     </div>
+  </header>
+  <div id="sharedMobileMenu" class="hidden md:hidden bg-white border-b border-primary/10 px-6 py-4 flex flex-col gap-3">
+    <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="index.html">Home</a>
+    <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="image_upload_page.html">Upload</a>
+    <a class="text-sm font-medium transition-colors text-primary font-bold" href="browse_products.html">Browse</a>
+    <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="style_match.html">Style Match</a>
+    <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="my_wardrobe.html">My Wardrobe</a>
+    <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="gemini_stylist.html">AI Stylist</a>
   </div>
-</header>
 
-<main class="max-w-7xl mx-auto w-full px-6 md:px-10 py-8">
-  <div class="flex flex-col md:flex-row gap-8">
-
-    <!-- Sidebar Filters -->
-    <aside class="w-full md:w-64 shrink-0 flex flex-col gap-8">
-      <div class="p-6 rounded-xl bg-primary/5 border border-primary/10">
-        <div class="flex items-center gap-2 mb-4">
-          <span class="material-symbols-outlined text-primary">magic_button</span>
-          <h3 class="font-bold text-sm">AI Stylist Picks</h3>
-        </div>
-        <p class="text-xs text-slate-500 mb-4 leading-relaxed">Based on your recent browsing for "Minimalist Summer", we recommend these filters.</p>
-        <button onclick="applyAIFilter()" class="w-full py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors">Apply AI Filter</button>
-      </div>
-
-      <div class="flex flex-col gap-6">
-        <!-- Category -->
-        <div>
-          <h3 class="font-semibold mb-3 text-sm flex items-center justify-between cursor-pointer" onclick="toggleSection('catSection')">
-            Category <span class="material-symbols-outlined text-xs">expand_more</span>
-          </h3>
-          <div id="catSection" class="space-y-2">
-            <label class="flex items-center gap-2 cursor-pointer"><input id="catAll" checked class="rounded border-primary/30 text-primary focus:ring-primary/20" type="checkbox" onchange="filterCategory('all')"/><span class="text-sm">All Items</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input class="rounded border-primary/30 text-primary focus:ring-primary/20" type="checkbox" onchange="filterCategory('dresses')"/><span class="text-sm">Dresses</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input class="rounded border-primary/30 text-primary focus:ring-primary/20" type="checkbox" onchange="filterCategory('outerwear')"/><span class="text-sm">Outerwear</span></label>
-            <label class="flex items-center gap-2 cursor-pointer"><input class="rounded border-primary/30 text-primary focus:ring-primary/20" type="checkbox" onchange="filterCategory('tops')"/><span class="text-sm">Tops</span></label>
+  <div class="flex min-h-screen flex-col">
+    <main class="mx-auto w-full max-w-7xl flex-1 px-6 py-10 lg:px-10 pt-24">
+      <section class="mb-8 rounded-[2rem] bg-white p-8 shadow-sm border border-slate-100">
+        <p class="text-xs font-bold uppercase tracking-[0.3em] text-primary">Catalog</p>
+        <div class="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 class="text-4xl font-black tracking-tight">Browse Products</h1>
+            <p id="itemCount" class="mt-2 text-slate-500">Loading available styles.</p>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-4">
+            <select id="typeFilter" class="rounded-xl border-slate-200 bg-white text-sm">
+              <option value="">All Types</option>
+              <option value="dress">Dress</option>
+              <option value="kurta">Kurta</option>
+              <option value="shirt">Shirt</option>
+              <option value="jacket">Jacket</option>
+              <option value="jeans">Jeans</option>
+              <option value="saree">Saree</option>
+            </select>
+            <select id="colorFilter" class="rounded-xl border-slate-200 bg-white text-sm">
+              <option value="">All Colors</option>
+              <option value="black">Black</option>
+              <option value="white">White</option>
+              <option value="blue">Blue</option>
+              <option value="green">Green</option>
+              <option value="pink">Pink</option>
+              <option value="purple">Purple</option>
+            </select>
+            <input id="brandFilter" type="text" placeholder="Brand" class="rounded-xl border-slate-200 bg-white text-sm" />
+            <select id="sortFilter" class="rounded-xl border-slate-200 bg-white text-sm">
+              <option value="relevance">Recommended</option>
+              <option value="rating">Top Rated</option>
+              <option value="price_asc">Price Low to High</option>
+              <option value="price_desc">Price High to Low</option>
+            </select>
           </div>
         </div>
+      </section>
 
-        <!-- Style -->
-        <div>
-          <h3 class="font-semibold mb-3 text-sm">Style</h3>
-          <div class="flex flex-wrap gap-2" id="styleBtns">
-            <button onclick="selectStyle(this)" class="px-3 py-1 rounded-full bg-primary text-white text-xs font-medium">Casual</button>
-            <button onclick="selectStyle(this)" class="px-3 py-1 rounded-full bg-primary/10 hover:bg-primary/20 text-xs font-medium">Streetwear</button>
-            <button onclick="selectStyle(this)" class="px-3 py-1 rounded-full bg-primary/10 hover:bg-primary/20 text-xs font-medium">Formal</button>
-            <button onclick="selectStyle(this)" class="px-3 py-1 rounded-full bg-primary/10 hover:bg-primary/20 text-xs font-medium">Minimal</button>
-          </div>
-        </div>
+      <section id="productsGrid" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"></section>
 
-        <!-- Color -->
-        <div>
-          <h3 class="font-semibold mb-3 text-sm">Color</h3>
-          <div class="flex flex-wrap gap-3" id="colorBtns">
-            <button onclick="selectColor(this)" class="size-6 rounded-full bg-black ring-2 ring-offset-2 ring-primary ring-opacity-0 hover:ring-opacity-100 transition-all"></button>
-            <button onclick="selectColor(this)" class="size-6 rounded-full bg-white border border-slate-200 ring-2 ring-offset-2 ring-primary ring-opacity-0 hover:ring-opacity-100 transition-all"></button>
-            <button onclick="selectColor(this)" class="size-6 rounded-full bg-blue-500 ring-2 ring-offset-2 ring-primary ring-opacity-0 hover:ring-opacity-100 transition-all"></button>
-            <button onclick="selectColor(this)" class="size-6 rounded-full bg-purple-500 ring-2 ring-offset-2 ring-primary ring-opacity-0 hover:ring-opacity-100 transition-all"></button>
-            <button onclick="selectColor(this)" class="size-6 rounded-full bg-green-500 ring-2 ring-offset-2 ring-primary ring-opacity-0 hover:ring-opacity-100 transition-all"></button>
-            <button onclick="selectColor(this)" class="size-6 rounded-full bg-yellow-500 ring-2 ring-offset-2 ring-primary ring-opacity-0 hover:ring-opacity-100 transition-all"></button>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Products Grid -->
-    <div class="flex-1">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h2 class="text-2xl font-bold">New Summer Arrivals</h2>
-          <p class="text-slate-500 text-sm" id="itemCount">124 items found matching your style</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="text-sm font-medium hidden sm:inline">Sort by:</span>
-          <div class="relative">
-            <button onclick="document.getElementById('sortMenu').classList.toggle('hidden')" class="flex items-center gap-2 px-4 py-2 bg-white border border-primary/10 rounded-xl text-sm font-medium">
-              <span id="sortLabel">Recommended</span>
-              <span class="material-symbols-outlined text-sm">keyboard_arrow_down</span>
-            </button>
-            <div id="sortMenu" class="hidden absolute right-0 top-full mt-1 bg-white border border-slate-100 rounded-xl shadow-xl z-10 min-w-[160px]">
-              <button onclick="setSort('Recommended')" class="block w-full text-left px-4 py-2 text-sm hover:bg-primary/5">Recommended</button>
-              <button onclick="setSort('Newest First')" class="block w-full text-left px-4 py-2 text-sm hover:bg-primary/5">Newest First</button>
-              <button onclick="setSort('Best Match')" class="block w-full text-left px-4 py-2 text-sm hover:bg-primary/5">Best Match</button>
-              <button onclick="setSort('Top Rated')" class="block w-full text-left px-4 py-2 text-sm hover:bg-primary/5">Top Rated</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- API-driven product grid -->
-      <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Populated by JavaScript -->
-      </div>
-
-      <!-- Pagination -->
-      <div class="mt-12 flex justify-center">
-        <nav class="flex items-center gap-2">
-          <button class="size-10 flex items-center justify-center rounded-lg border border-primary/10 hover:bg-primary/5"><span class="material-symbols-outlined">chevron_left</span></button>
-          <button class="size-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold">1</button>
-          <button onclick="location.href='browse_products.html'" class="size-10 flex items-center justify-center rounded-lg border border-primary/10 hover:bg-primary/5 font-medium">2</button>
-          <button onclick="location.href='browse_products.html'" class="size-10 flex items-center justify-center rounded-lg border border-primary/10 hover:bg-primary/5 font-medium">3</button>
-          <button class="size-10 flex items-center justify-center rounded-lg border border-primary/10 hover:bg-primary/5"><span class="material-symbols-outlined">chevron_right</span></button>
-        </nav>
-      </div>
-    </div>
+      <section class="mt-10 flex items-center justify-center gap-3">
+        <button id="prevButton" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Previous</button>
+        <p id="pageLabel" class="text-sm text-slate-500">Page 1</p>
+        <button id="nextButton" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Next</button>
+      </section>
+    </main>
   </div>
-</main>
 
-<!-- Footer -->
-<footer class="mt-auto border-t border-primary/10 bg-white py-12 px-10">
-  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
-    <div class="flex flex-col gap-4">
-      <div class="flex items-center gap-2">
-        <div class="flex items-center justify-center size-8 rounded-lg bg-primary text-white"><span class="material-symbols-outlined text-sm">auto_awesome</span></div>
-        <h2 class="text-lg font-bold tracking-tight">DressMate</h2>
-      </div>
-      <p class="text-sm text-slate-500 leading-relaxed">Personalizing your style journey through advanced AI recommendations.</p>
-    </div>
-    <div><h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Shopping</h4><ul class="space-y-2 text-sm text-slate-500"><li><a class="hover:text-primary" href="#">Women's</a></li><li><a class="hover:text-primary" href="#">Men's</a></li><li><a class="hover:text-primary" href="#">Accessories</a></li></ul></div>
-    <div><h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4><ul class="space-y-2 text-sm text-slate-500"><li><a class="hover:text-primary" href="#">About Us</a></li><li><a class="hover:text-primary" href="gemini_stylist.html">AI Stylist Blog</a></li><li><a class="hover:text-primary" href="#">Contact</a></li></ul></div>
-    <div><h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Stay Updated</h4><p class="text-sm text-slate-500 mb-4">Get the latest fashion trends and AI style insights.</p>
-      <div class="flex gap-2">
-        <input class="flex-1 text-sm bg-primary/5 border-none rounded-lg focus:ring-2 focus:ring-primary/20" placeholder="Your email" type="email"/>
-        <button class="px-4 py-2 bg-primary text-white rounded-lg font-medium text-sm hover:bg-primary/90">Join</button>
-      </div>
-    </div>
-  </div>
-  <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-primary/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
-    <p>© 2024 DressMate Inc. All rights reserved.</p>
-    <div class="flex gap-6"><a class="hover:text-primary" href="#">Privacy Policy</a><a class="hover:text-primary" href="#">Terms of Service</a></div>
-  </div>
-</footer>
+  <script src="api.js"></script>
+  <script>
+    initSharedPage({ activeNav: "browse" });
 
-</div>
-<script src="api.js"></script>
-<script src="auth.js"></script>
-<script>
-  let currentPage = 1;
-  let totalPages  = 1;
-  let currentSort = 'relevance';
-  let activeType  = '';
-  let activeColor = '';
+    const state = {
+      page: 1,
+      pages: 1,
+    };
 
-  // Optional auth - check if user is logged in
-  window.addEventListener('load', function() {
-    if (AUTH.isAuthenticated()) {
-      const profile = AUTH.getProfile();
-      if (profile) {
-        document.getElementById('userDropdownContent').innerHTML = `
-          <p class="text-sm font-semibold text-slate-900">${profile.name || 'User'}</p>
-          <p class="text-xs text-slate-500">${profile.email || 'email@example.com'}</p>
-        `;
-        const logoutBtn = document.createElement('button');
-        logoutBtn.textContent = 'Logout';
-        logoutBtn.className = 'w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50';
-        logoutBtn.onclick = () => AUTH.logout();
-        document.getElementById('userDropdown').appendChild(logoutBtn);
+    async function loadProducts() {
+      const grid = document.getElementById("productsGrid");
+      showSkeleton(grid, 8);
+
+      try {
+        const data = await API.listProducts({
+          productType: document.getElementById("typeFilter").value || undefined,
+          color: document.getElementById("colorFilter").value || undefined,
+          brand: document.getElementById("brandFilter").value.trim() || undefined,
+          sort: document.getElementById("sortFilter").value,
+          page: state.page,
+          perPage: 12,
+        });
+
+        state.pages = data.pages || 1;
+        document.getElementById("itemCount").textContent = `${data.total || 0} item${data.total === 1 ? "" : "s"} available`;
+        document.getElementById("pageLabel").textContent = `Page ${state.page} of ${state.pages}`;
+        document.getElementById("prevButton").disabled = state.page <= 1;
+        document.getElementById("nextButton").disabled = state.page >= state.pages;
+
+        if (!data.results || !data.results.length) {
+          grid.innerHTML = `<div class="col-span-full rounded-3xl bg-white p-12 text-center text-slate-500 border border-slate-100">No products found for these filters.</div>`;
+          return;
+        }
+
+        grid.innerHTML = data.results.map((product) => renderProductCard(product)).join("");
+      } catch (error) {
+        showError(grid, "Could not load products. Please make sure the backend is running.");
       }
     }
-  });
 
-  function toggleUserDropdown() {
-    const dropdown = document.getElementById('userDropdown');
-    dropdown.classList.toggle('hidden');
-    // Close dropdown if clicking outside
-    document.addEventListener('click', function closeDropdown(e) {
-      if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
-        dropdown.classList.add('hidden');
-        document.removeEventListener('click', closeDropdown);
+    function resetToFirstPage() {
+      state.page = 1;
+      loadProducts();
+    }
+
+    document.getElementById("typeFilter").addEventListener("change", resetToFirstPage);
+    document.getElementById("colorFilter").addEventListener("change", resetToFirstPage);
+    document.getElementById("sortFilter").addEventListener("change", resetToFirstPage);
+    document.getElementById("brandFilter").addEventListener("input", resetToFirstPage);
+    document.getElementById("prevButton").addEventListener("click", () => {
+      if (state.page > 1) {
+        state.page -= 1;
+        loadProducts();
       }
     });
-  }
-
-  async function loadProducts() {
-    const grid = document.getElementById('productsGrid');
-    showSkeleton(grid, 8);
-    try {
-      const data = await API.listProducts({
-        productType: activeType  || undefined,
-        color:       activeColor || undefined,
-        sort:        currentSort,
-        page:        currentPage,
-        perPage:     20,
-      });
-      if (!data.results || !data.results.length) {
-        grid.innerHTML = '<p class="col-span-4 text-center py-20 text-slate-400">No products found. Try different filters.</p>';
-        return;
+    document.getElementById("nextButton").addEventListener("click", () => {
+      if (state.page < state.pages) {
+        state.page += 1;
+        loadProducts();
       }
-      grid.innerHTML = data.results.map(p => renderProductCard(p)).join('');
-      totalPages = data.pages || 1;
-      if (document.getElementById('itemCount')) {
-        document.getElementById('itemCount').textContent =
-          `${data.total} items found`;
-      }
-      renderPagination(data.total, data.pages);
-    } catch(err) {
-      showError(grid, 'Backend not reachable. Start the server at localhost:8000.');
-    }
-  }
-
-  function renderPagination(total, pages) {
-    const nav = document.querySelector('nav.flex.items-center.gap-2');
-    if (!nav) return;
-    let html = `<button onclick="changePage(${currentPage-1})" ${currentPage===1?'disabled':''} class="size-10 flex items-center justify-center rounded-lg border border-primary/10 hover:bg-primary/5 disabled:opacity-40"><span class="material-symbols-outlined">chevron_left</span></button>`;
-    for (let i = 1; i <= Math.min(pages, 5); i++) {
-      html += `<button onclick="changePage(${i})" class="size-10 flex items-center justify-center rounded-lg ${i===currentPage?'bg-primary text-white font-bold':'border border-primary/10 hover:bg-primary/5 font-medium'}">${i}</button>`;
-    }
-    html += `<button onclick="changePage(${currentPage+1})" ${currentPage>=pages?'disabled':''} class="size-10 flex items-center justify-center rounded-lg border border-primary/10 hover:bg-primary/5 disabled:opacity-40"><span class="material-symbols-outlined">chevron_right</span></button>`;
-    nav.innerHTML = html;
-  }
-
-  function changePage(p) {
-    if (p < 1 || p > totalPages) return;
-    currentPage = p;
-    loadProducts();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function selectStyle(btn) {
-    document.querySelectorAll('#styleBtns button').forEach(b => {
-      b.className = 'px-3 py-1 rounded-full bg-primary/10 hover:bg-primary/20 text-xs font-medium';
     });
-    btn.className = 'px-3 py-1 rounded-full bg-primary text-white text-xs font-medium';
-    activeType  = btn.textContent.trim().toLowerCase().replace(/s$/, '');
-    currentPage = 1;
-    loadProducts();
-  }
 
-  function selectColor(btn) {
-    document.querySelectorAll('#colorBtns button').forEach(b => b.classList.remove('ring-2','ring-primary'));
-    btn.classList.add('ring-2','ring-primary');
-    activeColor = btn.dataset.color || '';
-    currentPage = 1;
-    loadProducts();
-  }
-
-  function setSort(label, value) {
-    document.getElementById('sortLabel').textContent = label;
-    document.getElementById('sortMenu').classList.add('hidden');
-    currentSort = value || 'relevance';
-    currentPage = 1;
-    loadProducts();
-  }
-
-  function applyAIFilter() {
-    currentPage = 1;
-    loadProducts();
-  }
-
-  function filterCategory(cat) {
-    activeType  = cat === 'all' ? '' : cat.replace(/s$/, '');
-    currentPage = 1;
-    loadProducts();
-  }
-
-  function toggleSection(id) {
-    document.getElementById(id).classList.toggle('hidden');
-  }
-
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('[onclick*="sortMenu"]')) {
-      document.getElementById('sortMenu')?.classList.add('hidden');
-    }
-  });
-
-  // Initial load
-  document.addEventListener('DOMContentLoaded', loadProducts);
-</script>
-</body></html>
+    document.addEventListener("DOMContentLoaded", loadProducts);
+  </script>
+</body>
+</html>

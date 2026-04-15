@@ -53,6 +53,7 @@
     <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="index.html">Home</a>
     <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="image_upload_page.html">Upload</a>
     <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="browse_products.html">Browse</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="style_match.html">Style Match</a>
     <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="my_wardrobe.html">My Wardrobe</a>
     <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="gemini_stylist.html">AI Stylist</a>
   </nav>
@@ -217,8 +218,11 @@
 </div>
 
 <script src="auth.js"></script>
+<script src="layout.js"></script>
 <script src="api.js"></script>
 <script>
+  initSharedPage({ activeNav: "home", requireAuth: true });
+
   // Auth check - redirect to login if not authenticated
   window.addEventListener('load', function() {
     if (!AUTH.isAuthenticated()) {
@@ -230,6 +234,7 @@
 
   function toggleUserDropdown() {
     const dropdown = document.getElementById('userDropdown');
+    if (!dropdown) return;
     dropdown.classList.toggle('hidden');
     document.addEventListener('click', function closeDropdown(e) {
       if (!e.target.closest('#userButton') && !e.target.closest('#userDropdown')) {
@@ -243,8 +248,10 @@
     // Load user profile
     const profile = AUTH.getProfile();
     if (profile) {
-      document.getElementById('userNameDropdown').textContent = profile.name || 'User';
-      document.getElementById('userEmailDropdown').textContent = profile.email || 'email@example.com';
+      const nameNode = document.getElementById('userNameDropdown');
+      const emailNode = document.getElementById('userEmailDropdown');
+      if (nameNode) nameNode.textContent = profile.name || 'User';
+      if (emailNode) emailNode.textContent = profile.email || 'email@example.com';
       document.getElementById('profileName').textContent = profile.name || 'Not set';
       document.getElementById('profileEmail').textContent = profile.email || 'Not set';
       
@@ -276,7 +283,7 @@
     container.innerHTML = '';
 
     history.slice(0, 10).forEach((item, index) => {
-      const date = new Date(item.timestamp || Date.now());
+      const date = new Date(item.created_at || Date.now());
       const dateStr = date.toLocaleDateString('en-US', { 
         month: 'short', 
         day: 'numeric',
@@ -284,7 +291,7 @@
         minute: '2-digit'
       });
 
-      const itemCount = item.results ? item.results.length : 0;
+      const itemCount = item.details?.product_ids?.length || 0;
 
       const historyCard = document.createElement('div');
       historyCard.className = 'border border-slate-100 rounded-xl p-4 hover:border-primary/20 transition-all hover:shadow-md cursor-pointer';
@@ -298,7 +305,7 @@
             </div>
             <div class="flex-1">
               <p class="font-semibold text-slate-900">
-                ${item.type === 'image' ? 'Image Upload' : 'Text Search'}
+                ${item.type === 'image' ? 'Image Upload' : item.type === 'style_match' ? 'Style Match' : 'Recommendation'}
               </p>
               <p class="text-xs text-slate-500 mt-1">${dateStr}</p>
             </div>
@@ -307,13 +314,8 @@
             ${itemCount} items
           </span>
         </div>
-        ${item.query ? `<p class="text-sm text-slate-600 ml-16">"${item.query}"</p>` : ''}
+        ${item.details?.skin_tone ? `<p class="text-sm text-slate-600 ml-16">Skin tone: ${item.details.skin_tone}</p>` : ''}
       `;
-      
-      historyCard.onclick = () => {
-        sessionStorage.setItem('recommendation_results', JSON.stringify(item.results || []));
-        window.location.href = 'system_feedback.html';
-      };
 
       container.appendChild(historyCard);
     });

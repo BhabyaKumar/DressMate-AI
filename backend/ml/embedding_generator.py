@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from feature_extraction import extract_features
+from vision.feature_extractor import extract_features
 
 DATA_PATH = "data/clean_fashion_dataset.csv"
 SAVE_PATH = "data/fashion_embeddings.npy"

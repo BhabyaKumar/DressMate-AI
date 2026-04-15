@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DressMate - Style Match</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#994ce6",
+            "background-light": "#f7f6f8",
+          },
+          fontFamily: {
+            display: ["Inter", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-family: "Inter", sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-background-light text-slate-900">
+  <script src="auth.js"></script>
+  <script src="layout.js"></script>
+
+  <!-- Navigation Bar -->
+  <header class="flex items-center justify-between border-b border-primary/10 bg-white/80 backdrop-blur-md px-6 py-4 lg:px-20 fixed top-0 left-0 right-0 z-50">
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="bg-primary p-2 rounded-lg text-white"><span class="material-symbols-outlined">apparel</span></div>
+        <h2 class="text-slate-900 text-xl font-bold tracking-tight">DressMate</h2>
+      </a>
+    </div>
+    <nav class="hidden md:flex items-center gap-10">
+      <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="index.html">Home</a>
+      <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="image_upload_page.html">Upload</a>
+      <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="browse_products.html">Browse</a>
+      <a class="text-sm font-medium transition-colors text-primary border-b-2 border-primary" href="style_match.html">Style Match</a>
+      <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="my_wardrobe.html">My Wardrobe</a>
+      <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="gemini_stylist.html">AI Stylist</a>
+    </nav>
+    <div class="flex items-center gap-4">
+      <button id="sharedMenuButton" class="md:hidden flex items-center justify-center rounded-full size-10 text-slate-500 hover:bg-slate-100 transition-colors">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <div class="relative">
+        <button id="sharedUserButton" class="h-10 w-10 rounded-full bg-primary/15 border-2 border-primary/25 flex items-center justify-center text-primary font-bold hover:border-primary/50 transition-all">U</button>
+        <div id="sharedUserDropdown" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg py-2 z-40 hidden border border-slate-100">
+          <div class="px-4 py-2 border-b border-slate-100">
+            <p class="text-sm font-semibold text-slate-900">User</p>
+            <p class="text-xs text-slate-500">Sign in to save your style</p>
+          </div>
+          <button id="sharedLoginBtn" class="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Login</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div id="sharedMobileMenu" class="hidden md:hidden bg-white border-b border-primary/10 px-6 py-4 flex flex-col gap-3">
+    <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="index.html">Home</a>
+    <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="image_upload_page.html">Upload</a>
+    <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="browse_products.html">Browse</a>
+    <a class="text-sm font-medium transition-colors text-primary font-bold" href="style_match.html">Style Match</a>
+    <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="my_wardrobe.html">My Wardrobe</a>
+    <a class="text-sm font-medium transition-colors text-slate-600 hover:text-primary" href="gemini_stylist.html">AI Stylist</a>
+  </div>
+
+  <div class="flex min-h-screen flex-col">
+    <main class="mx-auto w-full max-w-7xl flex-1 px-6 py-10 lg:px-10 pt-24">
+      <section class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <div class="rounded-[2rem] bg-white p-8 shadow-sm border border-slate-100">
+          <p class="text-xs font-bold uppercase tracking-[0.3em] text-primary">Personal Styling</p>
+          <h1 class="mt-3 text-4xl font-black tracking-tight">Style Match</h1>
+          <p class="mt-3 max-w-2xl text-slate-500">Upload a photo or enter your profile manually. We’ll return stable recommendations scored against your skin tone, body shape, and style preferences.</p>
+
+          <div class="mt-8 grid gap-4 md:grid-cols-2">
+            <button id="autoModeButton" class="rounded-2xl border-2 border-primary bg-primary/5 p-5 text-left" type="button"> 
+              <p class="text-sm font-bold text-slate-900">Auto Detect</p>
+              <p class="mt-1 text-sm text-slate-500">Use one photo to detect skin tone and body shape.</p>
+            </button>
+            <button id="manualModeButton" class="rounded-2xl border-2 border-slate-200 bg-white p-5 text-left" type="button">
+              <p class="text-sm font-bold text-slate-900">Manual Entry</p>
+              <p class="mt-1 text-sm text-slate-500">Choose your profile directly for predictable results.</p>
+            </button>
+          </div>
+
+          <div id="autoPanel" class="mt-6 rounded-3xl border border-dashed border-primary/30 bg-primary/5 p-6">
+            <input id="fileInput" type="file" accept="image/*" class="hidden" />
+            <button id="uploadTrigger" type="button" class="flex w-full flex-col items-center justify-center rounded-2xl bg-white px-6 py-12 text-center hover:bg-primary/5">
+              <span class="material-symbols-outlined text-5xl text-primary">add_photo_alternate</span>
+              <p class="mt-4 text-lg font-bold">Upload a photo</p>
+              <p class="mt-2 text-sm text-slate-500">JPG or PNG. The same image is used for both detections.</p>
+            </button>
+            <div id="previewBlock" class="mt-6 hidden rounded-2xl bg-white p-4">
+              <img id="previewImage" class="max-h-72 w-full rounded-2xl object-contain bg-slate-50" alt="Preview" />
+              <div class="mt-4 flex flex-wrap gap-2">
+                <span id="detectedSkinTone" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Skin tone: pending</span>
+                <span id="detectedBodyShape" class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Body shape: pending</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="manualPanel" class="mt-6 hidden grid gap-6 rounded-3xl border border-slate-200 bg-slate-50 p-6 md:grid-cols-2">
+            <div>
+              <label class="mb-2 block text-sm font-semibold">Skin Tone</label>
+              <select id="manualSkinTone" class="w-full border border-slate-200 rounded-xl bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="">Select skin tone</option>
+                <option value="Fair">Fair (Light skin)</option>
+                <option value="Medium">Medium (Medium skin)</option>
+                <option value="Deep">Deep (Dark skin)</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-2 block text-sm font-semibold">Body Shape</label>
+              <select id="manualBodyShape" class="w-full rounded-xl border-slate-200 bg-white">
+                <option value="">Select body shape</option>
+                <option value="Apple">Apple</option>
+                <option value="Pear">Pear</option>
+                <option value="Hourglass">Hourglass</option>
+                <option value="Rectangle">Rectangle</option>
+                <option value="Inverted Triangle">Inverted Triangle</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <label class="mb-3 block text-sm font-semibold">Style Preferences</label>
+            <div id="styleTypeChips" class="flex flex-wrap gap-3"></div>
+          </div>
+
+          <div id="validationMessage" class="mt-6 hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"></div>
+
+          <div class="mt-8 flex flex-wrap gap-3">
+            <button id="recommendButton" type="button" class="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 hover:bg-primary/90">Get Recommendations</button>
+            <button id="clearButton" type="button" class="rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Clear</button>
+          </div>
+        </div>
+
+        <aside class="rounded-[2rem] bg-slate-900 p-8 text-white shadow-sm">
+          <h2 class="text-2xl font-bold">How matching works</h2>
+          <div class="mt-6 space-y-5 text-sm text-slate-300">
+            <p>1. We detect or use your selected skin tone and body shape.</p>
+            <p>2. We score every product against tone, body-shape fit, and requested style types.</p>
+            <p>3. Results are sorted deterministically, so the same inputs return the same ranking.</p>
+          </div>
+          <div class="mt-8 rounded-3xl bg-white/10 p-6">
+            <p class="text-xs font-bold uppercase tracking-[0.3em] text-primary/80">Tip</p>
+            <p class="mt-3 text-sm text-slate-200">For best results, upload a clear front-facing image with even lighting or use Manual Entry if you want full control.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section id="resultsSection" class="mt-10 hidden">
+        <div class="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 class="text-3xl font-black tracking-tight">Recommended for you</h2>
+            <p id="analysisSummary" class="text-slate-500"></p>
+          </div>
+        </div>
+        <div id="resultsGrid" class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="api.js"></script>
+  <script>
+    initSharedPage({ activeNav: "style", requireAuth: true });
+
+    const STYLE_OPTIONS = ["Casual", "Formal", "Ethnic", "Kurta", "Streetwear", "Minimalist", "Boho", "Activewear", "Party"];
+    const state = {
+      mode: "auto",
+      file: null,
+      detectedSkinTone: "",
+      detectedBodyShape: "",
+      selectedDressTypes: [],
+    };
+
+    function renderStyleChips() {
+      const root = document.getElementById("styleTypeChips");
+      root.innerHTML = STYLE_OPTIONS.map((option) => {
+        const active = state.selectedDressTypes.includes(option);
+        return `<button type="button" data-style="${option}" class="rounded-full border px-4 py-2 text-sm font-semibold ${active ? "border-primary bg-primary text-white" : "border-slate-200 bg-white text-slate-700"}">${option}</button>`;
+      }).join("");
+
+      root.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const value = button.dataset.style;
+          if (state.selectedDressTypes.includes(value)) {
+            state.selectedDressTypes = state.selectedDressTypes.filter((item) => item !== value);
+          } else {
+            state.selectedDressTypes = [...state.selectedDressTypes, value];
+          }
+          renderStyleChips();
+        });
+      });
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      document.getElementById("autoPanel").classList.toggle("hidden", mode !== "auto");
+      document.getElementById("manualPanel").classList.toggle("hidden", mode !== "manual");
+      document.getElementById("autoModeButton").className = `rounded-2xl border-2 p-5 text-left ${mode === "auto" ? "border-primary bg-primary/5" : "border-slate-200 bg-white"}`;
+      document.getElementById("manualModeButton").className = `rounded-2xl border-2 p-5 text-left ${mode === "manual" ? "border-primary bg-primary/5" : "border-slate-200 bg-white"}`;
+    }
+
+    function showValidation(message) {
+      const node = document.getElementById("validationMessage");
+      node.textContent = message;
+      node.classList.remove("hidden");
+    }
+
+    function clearValidation() {
+      document.getElementById("validationMessage").classList.add("hidden");
+    }
+
+    async function analyzeImage(file) {
+      const previewImage = document.getElementById("previewImage");
+      const previewBlock = document.getElementById("previewBlock");
+      previewImage.src = URL.createObjectURL(file);
+      previewBlock.classList.remove("hidden");
+      document.getElementById("detectedSkinTone").textContent = "Skin tone: analyzing";
+      document.getElementById("detectedBodyShape").textContent = "Body shape: analyzing";
+
+      const [skinTone, bodyShape] = await Promise.all([
+        API.analyzeSkinTone(file),
+        API.analyzeBodyShape(file),
+      ]);
+
+      state.detectedSkinTone = skinTone.skin_tone || "";
+      state.detectedBodyShape = bodyShape.body_shape || "";
+
+      document.getElementById("detectedSkinTone").textContent = `Skin tone: ${state.detectedSkinTone || "Unknown"}`;
+      document.getElementById("detectedBodyShape").textContent = `Body shape: ${state.detectedBodyShape || "Unknown"}`;
+    }
+
+    async function runStyleMatch() {
+      clearValidation();
+
+      const skinTone = state.mode === "auto" ? state.detectedSkinTone : document.getElementById("manualSkinTone").value;
+      const bodyShape = state.mode === "auto" ? state.detectedBodyShape : document.getElementById("manualBodyShape").value;
+
+      if (!skinTone || !bodyShape) {
+        showValidation("Choose or detect both skin tone and body shape before matching.");
+        return;
+      }
+
+      if (!state.selectedDressTypes.length) {
+        showValidation("Select at least one style preference so matching can rank products correctly.");
+        return;
+      }
+
+      const button = document.getElementById("recommendButton");
+      button.disabled = true;
+      button.textContent = "Matching...";
+
+      try {
+        const data = await API.styleMatch({
+          file: state.mode === "auto" ? state.file : null,
+          skinTone,
+          bodyShape,
+          dressTypes: state.selectedDressTypes,
+          topK: 8,
+          token: AUTH.getToken(),
+        });
+
+        document.getElementById("analysisSummary").textContent = `Skin tone: ${data.analysis.skin_tone} | Body shape: ${data.analysis.body_shape} | Styles: ${data.analysis.dress_types.join(", ")}`;
+        document.getElementById("resultsGrid").innerHTML = data.results.map((item) => renderProductCard(item, { showSimilarity: true })).join("");
+        document.getElementById("resultsSection").classList.remove("hidden");
+        document.getElementById("resultsSection").scrollIntoView({ behavior: "smooth" });
+      } catch (error) {
+        showValidation(error.message.replace(/^"|"$/g, ""));
+      } finally {
+        button.disabled = false;
+        button.textContent = "Get Recommendations";
+      }
+    }
+
+    function clearState() {
+      state.file = null;
+      state.detectedSkinTone = "";
+      state.detectedBodyShape = "";
+      state.selectedDressTypes = [];
+      document.getElementById("fileInput").value = "";
+      document.getElementById("manualSkinTone").value = "";
+      document.getElementById("manualBodyShape").value = "";
+      document.getElementById("previewBlock").classList.add("hidden");
+      document.getElementById("resultsSection").classList.add("hidden");
+      clearValidation();
+      renderStyleChips();
+    }
+
+    document.getElementById("autoModeButton").addEventListener("click", () => setMode("auto"));
+    document.getElementById("manualModeButton").addEventListener("click", () => setMode("manual"));
+    document.getElementById("uploadTrigger").addEventListener("click", () => document.getElementById("fileInput").click());
+    document.getElementById("fileInput").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      state.file = file;
+      clearValidation();
+      try {
+        await analyzeImage(file);
+      } catch (error) {
+        showValidation("Image analysis failed. Please try another image or switch to Manual Entry.");
+      }
+    });
+    document.getElementById("recommendButton").addEventListener("click", runStyleMatch);
+    document.getElementById("clearButton").addEventListener("click", clearState);
+
+    renderStyleChips();
+    setMode("auto");
+  </script>
+</body>
+</html>

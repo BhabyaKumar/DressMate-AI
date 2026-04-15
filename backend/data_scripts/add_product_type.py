@@ -1,5 +1,5 @@
 import pandas as pd
-from product_type_detection import detect_product_type
+from ml.product_classifier import detect_product_type
 
 DATA_PATH = "data/clean_fashion_dataset.csv"
 

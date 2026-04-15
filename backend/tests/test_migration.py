@@ -1,6 +1,6 @@
 """Test script to verify MongoDB migration was successful."""
 
-from database import connect_to_mongodb, get_all_products
+from database.config import connect_to_mongodb, get_all_products
 
 if connect_to_mongodb():
     products = get_all_products(limit=5)

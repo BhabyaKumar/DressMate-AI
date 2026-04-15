@@ -28,6 +28,7 @@
 </style>
 </head>
 <body class="bg-background-light min-h-screen text-slate-900">
+<script src="layout.js"></script>
 <div class="layout-container flex h-full grow flex-col">
 
 <!-- Navigation -->
@@ -42,6 +43,7 @@
     <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="index.html">Home</a>
     <a class="text-primary text-sm font-semibold" href="image_upload_page.html">Upload</a>
     <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="browse_products.html">Browse</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="style_match.html">Style Match</a>
     <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="my_wardrobe.html">My Wardrobe</a>
     <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="gemini_stylist.html">AI Stylist</a>
   </nav>
@@ -179,6 +181,8 @@
 <script src="api.js"></script>
 <script src="auth.js"></script>
 <script>
+  initSharedPage({ activeNav: "upload", requireAuth: true });
+
   // Auth check - redirect to login if not authenticated
   window.addEventListener('load', function() {
     if (!AUTH.isAuthenticated()) {
@@ -188,13 +192,16 @@
     // Display user info
     const profile = AUTH.getProfile();
     if (profile) {
-      document.getElementById('userNameDropdown').textContent = profile.name || 'User';
-      document.getElementById('userEmailDropdown').textContent = profile.email || 'email@example.com';
+      const nameNode = document.getElementById('userNameDropdown');
+      const emailNode = document.getElementById('userEmailDropdown');
+      if (nameNode) nameNode.textContent = profile.name || 'User';
+      if (emailNode) emailNode.textContent = profile.email || 'email@example.com';
     }
   });
 
   function toggleUserDropdown() {
     const dropdown = document.getElementById('userDropdown');
+    if (!dropdown) return;
     dropdown.classList.toggle('hidden');
     // Close dropdown if clicking outside
     document.addEventListener('click', function closeDropdown(e) {
@@ -223,6 +230,7 @@
   const previewImg = document.getElementById('previewImg');
   const emptyState = document.getElementById('emptyState');
   let selectedFile = null;
+  const RECOMMENDATION_RESULTS_COUNT = 12; // Number of similar items to return
 
   fileInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
@@ -280,7 +288,7 @@
 
     // Call backend with authentication
     try {
-      const data = await AUTH.uploadImage(selectedFile, 12, 120000);
+      const data = await AUTH.uploadImage(selectedFile, RECOMMENDATION_RESULTS_COUNT);
       
       // Check if there was an error in the response
       if (data.error) {

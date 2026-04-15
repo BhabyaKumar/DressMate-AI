@@ -16,7 +16,7 @@ This script:
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from database import connect_to_mongodb, db, insert_products, delete_all_products
+from database.config import connect_to_mongodb, db, insert_products, delete_all_products
 import sys
 
 

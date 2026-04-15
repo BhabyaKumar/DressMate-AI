@@ -25,6 +25,14 @@ const AUTH = {
   },
 
   /**
+   * Clear auth session without forcing page navigation.
+   */
+  clearSession() {
+    localStorage.removeItem(AUTH.TOKEN_KEY);
+    localStorage.removeItem(AUTH.USER_KEY);
+  },
+
+  /**
    * Get token from localStorage
    */
   getToken() {
@@ -40,18 +48,56 @@ const AUTH = {
   },
 
   /**
+   * Decode JWT payload safely.
+   */
+  decodeToken(token) {
+    try {
+      const payloadPart = token.split(".")[1];
+      if (!payloadPart) return null;
+      const normalized = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
+      const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+      const payloadJson = decodeURIComponent(
+        atob(padded)
+          .split("")
+          .map((c) => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
+          .join("")
+      );
+      return JSON.parse(payloadJson);
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * Returns true only when token exists and is not expired.
+   */
+  hasValidToken() {
+    const token = AUTH.getToken();
+    if (!token) return false;
+
+    const payload = AUTH.decodeToken(token);
+    if (!payload || !payload.exp) return false;
+
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp > now;
+  },
+
+  /**
    * Check if user is authenticated
    */
   isAuthenticated() {
-    return !!AUTH.getToken();
+    const isValid = AUTH.hasValidToken();
+    if (!isValid && AUTH.getToken()) {
+      AUTH.clearSession();
+    }
+    return isValid;
   },
 
   /**
    * Logout - clear token and user data
    */
   logout() {
-    localStorage.removeItem(AUTH.TOKEN_KEY);
-    localStorage.removeItem(AUTH.USER_KEY);
+    AUTH.clearSession();
     console.log("✓ Logged out");
     window.location.href = "login.html";
   },
@@ -60,8 +106,42 @@ const AUTH = {
    * Get authorization header
    */
   getAuthHeader() {
+    if (!AUTH.isAuthenticated()) return {};
     const token = AUTH.getToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
+  },
+
+  /**
+   * Fetch profile from backend and refresh local cached user.
+   */
+  async refreshProfile() {
+    if (!AUTH.isAuthenticated()) return null;
+    try {
+      const response = await fetch(`${AUTH.API_BASE}/api/auth/profile`, {
+        headers: AUTH.getAuthHeader(),
+      });
+
+      if (response.status === 401) {
+        AUTH.clearSession();
+        return null;
+      }
+
+      if (!response.ok) return AUTH.getUser();
+
+      const profile = await response.json();
+      const token = AUTH.getToken();
+      if (token) {
+        AUTH.saveToken(token, {
+          user_id: profile.user_id,
+          email: profile.email,
+          name: profile.name || "User",
+        });
+      }
+      return profile;
+    } catch (error) {
+      console.error("Refresh profile error:", error);
+      return AUTH.getUser();
+    }
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -90,6 +170,8 @@ const AUTH = {
         email: data.email,
         name: name,
       });
+
+      await AUTH.refreshProfile();
 
       return { success: true, data };
     } catch (error) {
@@ -122,22 +204,7 @@ const AUTH = {
         name: data.name || "User", // Use name from response if available
       });
 
-      // Fetch full profile to get all user data including name
-      try {
-        const profileResponse = await fetch(`${AUTH.API_BASE}/api/auth/profile`, {
-          headers: { Authorization: `Bearer ${data.access_token}` },
-        });
-        if (profileResponse.ok) {
-          const profile = await profileResponse.json();
-          AUTH.saveToken(data.access_token, {
-            user_id: profile._id || data.user_id,
-            email: profile.email || data.email,
-            name: profile.name || data.name || "User",
-          });
-        }
-      } catch (e) {
-        console.warn("Could not fetch full profile:", e);
-      }
+      await AUTH.refreshProfile();
 
       return { success: true, data };
     } catch (error) {
@@ -149,19 +216,8 @@ const AUTH = {
   /**
    * Get current user profile
    */
-  async getProfile() {
-    try {
-      const response = await fetch(`${AUTH.API_BASE}/api/auth/profile`, {
-        headers: AUTH.getAuthHeader(),
-      });
-
-      if (!response.ok) throw new Error("Failed to fetch profile");
-
-      return await response.json();
-    } catch (error) {
-      console.error("Get profile error:", error);
-      return null;
-    }
+  getProfile() {
+    return AUTH.getUser();
   },
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -177,10 +233,16 @@ const AUTH = {
       ...AUTH.getAuthHeader(),
     };
 
-    return fetch(`${AUTH.API_BASE}${endpoint}`, {
+    const response = await fetch(`${AUTH.API_BASE}${endpoint}`, {
       ...options,
       headers,
     });
+
+    if (response.status === 401) {
+      AUTH.clearSession();
+    }
+
+    return response;
   },
 
   /**
@@ -194,10 +256,11 @@ const AUTH = {
 
       if (!response.ok) throw new Error("Failed to fetch history");
 
-      return await response.json();
+      const data = await response.json();
+      return data.history || [];
     } catch (error) {
       console.error("Get history error:", error);
-      return { history: [], error: error.message };
+      return [];
     }
   },
 
@@ -254,10 +317,16 @@ const AUTH = {
   /**
    * Chat with AI stylist
    */
-  async chat(message) {
+  async chat(message, history = "") {
     try {
+      const params = new URLSearchParams();
+      params.append('message', message);
+      if (history) {
+        params.append('history', history);
+      }
+
       const response = await AUTH.call(
-        `/api/chat?message=${encodeURIComponent(message)}`,
+        `/api/chat?${params.toString()}`,
         { method: "POST" }
       );
 

@@ -32,11 +32,11 @@ def connect_to_mongodb():
         # Verify connection
         client.admin.command('ping')
         db = client[DATABASE_NAME]
-        print(f"✓ Connected to MongoDB: {DATABASE_NAME}")
+        print(f"[ok] Connected to MongoDB: {DATABASE_NAME}")
         initialize_collections()
         return True
     except (ConnectionFailure, ServerSelectionTimeoutError) as e:
-        print(f"✗ Failed to connect to MongoDB: {e}")
+        print(f"[error] Failed to connect to MongoDB: {e}")
         print("  Make sure MongoDB is running on localhost:27017")
         print("  Or update MONGODB_URL in your .env file")
         return False
@@ -47,7 +47,7 @@ def close_mongodb():
     global client
     if client:
         client.close()
-        print("✓ MongoDB connection closed")
+        print("[ok] MongoDB connection closed")
 
 
 def initialize_collections():
@@ -60,7 +60,7 @@ def initialize_collections():
     # Create products collection with indexes
     if "products" not in db.list_collection_names():
         db.create_collection("products")
-        print("✓ Created 'products' collection")
+        print("[ok] Created 'products' collection")
     
     # Create indexes on products
     db.products.create_index([("name", ASCENDING)])
@@ -72,14 +72,14 @@ def initialize_collections():
     # Create users collection
     if "users" not in db.list_collection_names():
         db.create_collection("users")
-        print("✓ Created 'users' collection")
+        print("[ok] Created 'users' collection")
     
     db.users.create_index([("email", ASCENDING)], unique=True)
     
     # Create recommendations collection
     if "recommendations" not in db.list_collection_names():
         db.create_collection("recommendations")
-        print("✓ Created 'recommendations' collection")
+        print("[ok] Created 'recommendations' collection")
     
     db.recommendations.create_index([("user_id", ASCENDING)])
     db.recommendations.create_index([("created_at", DESCENDING)])

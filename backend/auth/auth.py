@@ -11,7 +11,7 @@ import jwt
 import hashlib
 from fastapi import Depends, HTTPException, status, Header
 from pydantic import BaseModel
-from database import (
+from database.config import (
     insert_user,
     get_user_by_email,
     db,
