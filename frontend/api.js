@@ -96,11 +96,21 @@ const API = {
     return response.json();
   },
 
-  async styleMatch({ file = null, skinTone = "", bodyShape = "", dressTypes = [], topK = 8, token = "" } = {}) {
+  async getColorRecommendations({ skinTone = "", bodyShape = "" } = {}) {
+    const params = new URLSearchParams();
+    if (skinTone) params.append("skin_tone", skinTone);
+    if (bodyShape) params.append("body_shape", bodyShape);
+    const response = await fetch(`${API_BASE}/api/style-match/colors?${params}`, { method: "POST" });
+    if (!response.ok) throw new Error(`Server error ${response.status}`);
+    return response.json();
+  },
+
+  async styleMatch({ file = null, skinTone = "", bodyShape = "", dressTypes = [], color = "", topK = 8, token = "" } = {}) {
     const params = new URLSearchParams({ top_k: String(topK) });
     if (skinTone) params.append("skin_tone", skinTone);
     if (bodyShape) params.append("body_shape", bodyShape);
     if (dressTypes.length) params.append("dress_types", dressTypes.join(","));
+    if (color) params.append("color", color);
 
     const options = {
       method: "POST",

@@ -306,17 +306,10 @@ def normalize_style_types(dress_types: List[str]) -> List[str]:
     return normalized
 
 
-def score_style_match(product: dict, skin_tone: str, body_shape: str, dress_types: List[str], selected_color: Optional[str] = None) -> float:
+def score_style_match(product: dict, skin_tone: str, body_shape: str, dress_types: List[str]) -> float:
     """
     Score a product against user preferences.
     Properly weights skin tone, body shape, and dress type.
-
-    Parameters:
-    - product: Product dict from database
-    - skin_tone: Normalized skin tone (fair, medium, deep)
-    - body_shape: Normalized body shape
-    - dress_types: List of normalized dress type preferences
-    - selected_color: Optional user-selected color name (e.g., "gold")
     """
     score = 0.0
     product_type = str(product.get("product_type", "")).lower()
@@ -326,15 +319,6 @@ def score_style_match(product: dict, skin_tone: str, body_shape: str, dress_type
     # Base score from rating (0-1)
     base_rating_score = float(product.get("rating", 3.0) or 3.0) / 5.0
     score += base_rating_score * 1.5  # Rating contributes 0-1.5 points
-
-    # ========== USER SELECTED COLOR BONUS ==========
-    # Strong bonus if user selected a specific color
-    if selected_color:
-        selected_color_lower = selected_color.lower()
-        # Exact or fuzzy match
-        if selected_color_lower in product_color or product_color in selected_color_lower:
-            score += 1.0  # Bonus for color match
-        # If no match, no penalty (to preserve other good matches)
 
     # ========== SKIN TONE MATCHING ==========
     # Strategy: Match on color recommendations for detected skin tone
@@ -876,16 +860,13 @@ def get_products_batch(ids: str = Query(..., description="Comma-separated produc
 
 @app.post("/api/analyze/skin-tone")
 async def analyze_skin_tone(file: UploadFile = File(...)):
-    """Detect skin tone and undertone from uploaded photo."""
+    """Detect skin tone from uploaded photo."""
     try:
         contents = await file.read()
         img_pil  = Image.open(io.BytesIO(contents)).convert("RGB")
         img_arr  = np.array(img_pil)
-        # Get full skin properties (tone, undertone, brightness)
-        properties = detect_skin_properties_from_array(img_arr)
-        tone = properties.get("tone", "medium").capitalize()
-        undertone = properties.get("undertone", "neutral").lower()
-        return {"status": "success", "skin_tone": tone, "undertone": undertone}
+        tone     = detect_skin_tone_from_array(img_arr)
+        return {"status": "success", "skin_tone": tone}
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(500, str(e))
@@ -1174,7 +1155,6 @@ async def style_match(
     skin_tone: Optional[str] = Query(None),
     body_shape: Optional[str] = Query(None),
     dress_types: Optional[str] = Query(None),  # comma-separated list
-    color: Optional[str] = Query(None),  # NEW: user-selected color
     top_k: int = Query(8, ge=1, le=50),
     current_user: dict = Depends(get_current_user_optional),
 ):
@@ -1213,7 +1193,6 @@ async def style_match(
                 normalized_skin_tone,
                 normalized_body_shape,
                 selected_types,
-                color,  # NEW: pass user-selected color
             )
             ranked_products.append((product, score))
 
@@ -1247,61 +1226,6 @@ async def style_match(
             },
             "results": results,
             "total": len(results),
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        traceback.print_exc()
-        raise HTTPException(500, str(e))
-
-
-# ── 11b. Get color recommendations based on skin tone ──────────────────────
-@app.post("/api/style-match/colors")
-async def get_color_recommendations(
-    skin_tone: Optional[str] = Query(None),
-    undertone: Optional[str] = Query(None),
-    body_shape: Optional[str] = Query(None),
-):
-    """
-    Get color recommendations based on skin tone and undertone.
-
-    Parameters:
-    - skin_tone: Fair, Medium, or Deep
-    - undertone: warm, cool, or neutral (optional, defaults to neutral)
-    - body_shape: (optional, reserved for future enhancement)
-
-    Returns:
-    {
-      "status": "success",
-      "skin_tone": "fair",
-      "undertone": "warm",
-      "colors": ["gold", "orange", "peach", ...],
-      "total": 8
-    }
-    """
-    try:
-        if not skin_tone:
-            raise HTTPException(400, "Please provide skin_tone parameter")
-
-        # Normalize inputs
-        normalized_tone = normalize_skin_tone(skin_tone).lower()
-        normalized_undertone = str(undertone or "neutral").strip().lower()
-
-        # Validate undertone
-        valid_undertones = ["warm", "cool", "neutral"]
-        if normalized_undertone not in valid_undertones:
-            normalized_undertone = "neutral"
-
-        # Get recommended colors from vision module
-        colors = recommend_colors(normalized_tone, normalized_undertone)
-
-        return {
-            "status": "success",
-            "skin_tone": normalized_tone,
-            "undertone": normalized_undertone,
-            "colors": colors,
-            "total": len(colors),
         }
 
     except HTTPException:
