@@ -80,25 +80,7 @@
             <h1 class="text-4xl font-black tracking-tight">Browse Products</h1>
             <p id="itemCount" class="mt-2 text-slate-500">Loading available styles.</p>
           </div>
-          <div class="grid gap-3 sm:grid-cols-4">
-            <select id="typeFilter" class="rounded-xl border-slate-200 bg-white text-sm">
-              <option value="">All Types</option>
-              <option value="dress">Dress</option>
-              <option value="kurta">Kurta</option>
-              <option value="shirt">Shirt</option>
-              <option value="jacket">Jacket</option>
-              <option value="jeans">Jeans</option>
-              <option value="saree">Saree</option>
-            </select>
-            <select id="colorFilter" class="rounded-xl border-slate-200 bg-white text-sm">
-              <option value="">All Colors</option>
-              <option value="black">Black</option>
-              <option value="white">White</option>
-              <option value="blue">Blue</option>
-              <option value="green">Green</option>
-              <option value="pink">Pink</option>
-              <option value="purple">Purple</option>
-            </select>
+          <div class="grid gap-3 sm:grid-cols-2">
             <input id="brandFilter" type="text" placeholder="Brand" class="rounded-xl border-slate-200 bg-white text-sm" />
             <select id="sortFilter" class="rounded-xl border-slate-200 bg-white text-sm">
               <option value="relevance">Recommended</option>
@@ -135,8 +117,6 @@
 
       try {
         const data = await API.listProducts({
-          productType: document.getElementById("typeFilter").value || undefined,
-          color: document.getElementById("colorFilter").value || undefined,
           brand: document.getElementById("brandFilter").value.trim() || undefined,
           sort: document.getElementById("sortFilter").value,
           page: state.page,
@@ -165,8 +145,6 @@
       loadProducts();
     }
 
-    document.getElementById("typeFilter").addEventListener("change", resetToFirstPage);
-    document.getElementById("colorFilter").addEventListener("change", resetToFirstPage);
     document.getElementById("sortFilter").addEventListener("change", resetToFirstPage);
     document.getElementById("brandFilter").addEventListener("input", resetToFirstPage);
     document.getElementById("prevButton").addEventListener("click", () => {

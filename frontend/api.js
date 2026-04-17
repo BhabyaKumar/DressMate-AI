@@ -180,7 +180,14 @@ function renderProductCard(product, { onclick = null, showSimilarity = false } =
   const price = product.price || "";
   const colour = product.colour || "";
   const rating = product.rating ? Number(product.rating).toFixed(1) : "4.0";
-  const simPct = showSimilarity ? Math.round((product.similarity || 0) * 100) : null;
+  let simPct = null;
+  if (showSimilarity && product.similarity != null) {
+    // Handle both decimal (0-1) and percentage (0-100) scales
+    let pct = product.similarity > 1 ? product.similarity : product.similarity * 100;
+    // Clamp to 0-100 range
+    pct = Math.max(0, Math.min(100, pct));
+    simPct = Math.round(pct);
+  }
   const encodedProduct = encodeProductPayload(product);
   const clickAttr = onclick
     ? `onclick='${onclick}(${JSON.stringify(id)})'`

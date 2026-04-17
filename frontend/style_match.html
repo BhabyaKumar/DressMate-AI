@@ -24,35 +24,6 @@
   </script>
   <style>
     body { font-family: "Inter", sans-serif; }
-
-    .color-chip {
-      width: 60px;
-      height: 60px;
-      border-radius: 8px;
-      border: 3px solid transparent;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-center;
-      font-weight: 600;
-      font-size: 11px;
-      text-transform: capitalize;
-      word-break: break-word;
-      padding: 4px;
-      text-align: center;
-      box-sizing: border-box;
-    }
-
-    .color-chip:hover {
-      transform: scale(1.1);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    .color-chip.selected {
-      border: 3px solid #994ce6;
-      box-shadow: 0 0 12px rgba(153, 76, 230, 0.5);
-    }
   </style>
 </head>
 <body class="min-h-screen bg-background-light text-slate-900">
@@ -158,16 +129,6 @@
             </div>
           </div>
 
-          <div id="colorSection" class="mt-8 hidden">
-            <label class="mb-3 block text-sm font-semibold">Recommended Colors</label>
-            <p class="mb-4 text-xs text-slate-500">Choose a color that works best with your skin tone (optional)</p>
-            <div id="colorChips" class="flex flex-wrap gap-2"></div>
-          </div>
-
-          <div class="mt-8">
-            <label class="mb-3 block text-sm font-semibold">Style Preferences</label>
-            <div id="styleTypeChips" class="flex flex-wrap gap-3"></div>
-          </div>
 
           <div id="validationMessage" class="mt-6 hidden rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"></div>
 
@@ -214,29 +175,7 @@
       detectedSkinTone: "",
       detectedBodyShape: "",
       detectedUndertone: "",
-      selectedDressTypes: [],
-      selectedColor: "",
     };
-
-    function renderStyleChips() {
-      const root = document.getElementById("styleTypeChips");
-      root.innerHTML = STYLE_OPTIONS.map((option) => {
-        const active = state.selectedDressTypes.includes(option);
-        return `<button type="button" data-style="${option}" class="rounded-full border px-4 py-2 text-sm font-semibold ${active ? "border-primary bg-primary text-white" : "border-slate-200 bg-white text-slate-700"}">${option}</button>`;
-      }).join("");
-
-      root.querySelectorAll("button").forEach((button) => {
-        button.addEventListener("click", () => {
-          const value = button.dataset.style;
-          if (state.selectedDressTypes.includes(value)) {
-            state.selectedDressTypes = state.selectedDressTypes.filter((item) => item !== value);
-          } else {
-            state.selectedDressTypes = [...state.selectedDressTypes, value];
-          }
-          renderStyleChips();
-        });
-      });
-    }
 
     function setMode(mode) {
       state.mode = mode;
@@ -256,86 +195,6 @@
       document.getElementById("validationMessage").classList.add("hidden");
     }
 
-    async function updateColorRecommendations() {
-      const skinTone = state.mode === "auto" ? state.detectedSkinTone : document.getElementById("manualSkinTone").value;
-      const bodyShape = state.mode === "auto" ? state.detectedBodyShape : document.getElementById("manualBodyShape").value;
-
-      if (!skinTone) {
-        document.getElementById("colorSection").classList.add("hidden");
-        return;
-      }
-
-      try {
-        const data = await API.getColorRecommendations({ skinTone, bodyShape });
-        if (data.status === "success" && data.colors && data.colors.length > 0) {
-          renderColorChips(data.colors);
-          document.getElementById("colorSection").classList.remove("hidden");
-        } else {
-          document.getElementById("colorSection").classList.add("hidden");
-        }
-      } catch (error) {
-        console.error("Failed to get color recommendations:", error);
-        document.getElementById("colorSection").classList.add("hidden");
-      }
-    }
-
-    function renderColorChips(colors) {
-      const root = document.getElementById("colorChips");
-      root.innerHTML = colors.map((color) => {
-        const active = state.selectedColor === color;
-        const bgColor = getColorBackgroundStyle(color);
-        return `<button type="button" data-color="${color}" class="color-chip ${active ? "selected" : ""}" style="${bgColor}" title="${color}">${color}</button>`;
-      }).join("");
-
-      root.querySelectorAll(".color-chip").forEach((button) => {
-        button.addEventListener("click", () => {
-          const value = button.dataset.color;
-          state.selectedColor = state.selectedColor === value ? "" : value;
-          renderColorChips(colors);
-        });
-      });
-    }
-
-    function getColorBackgroundStyle(color) {
-      const colorMap = {
-        "gold": "#FFD700",
-        "orange": "#FFA500",
-        "peach": "#FFDAB9",
-        "coral": "#FF7F50",
-        "mustard": "#FFDB58",
-        "maroon": "#800000",
-        "emerald": "#50C878",
-        "crimson": "#DC143C",
-        "blue": "#0000FF",
-        "navy": "#000080",
-        "purple": "#800080",
-        "pink": "#FFC0CB",
-        "lavender": "#E6E6FA",
-        "olive": "#808000",
-        "teal": "#008080",
-        "yellow": "#FFFF00",
-        "white": "#FFFFFF",
-        "grey": "#808080",
-        "black": "#000000",
-        "beige": "#F5F5DC",
-        "cream": "#FFFDD0",
-        "bright white": "#FFFFFF",
-        "pastel": "#FFB3D9",
-      };
-
-      const bgColor = colorMap[color.toLowerCase()] || "#E0E7FF";
-      const textColor = shouldUseDarkText(bgColor) ? "#000000" : "#FFFFFF";
-      return `background-color: ${bgColor}; color: ${textColor};`;
-    }
-
-    function shouldUseDarkText(hexColor) {
-      const r = parseInt(hexColor.substr(1, 2), 16);
-      const g = parseInt(hexColor.substr(3, 2), 16);
-      const b = parseInt(hexColor.substr(5, 2), 16);
-      return r * 0.299 + g * 0.587 + b * 0.114 > 156;
-    }
-
-
     async function analyzeImage(file) {
       const previewImage = document.getElementById("previewImage");
       const previewBlock = document.getElementById("previewBlock");
@@ -352,13 +211,9 @@
       state.detectedSkinTone = skinTone.skin_tone || "";
       state.detectedBodyShape = bodyShape.body_shape || "";
       state.detectedUndertone = skinTone.undertone || "";
-      state.selectedColor = "";  // Reset color selection
 
       document.getElementById("detectedSkinTone").textContent = `Skin tone: ${state.detectedSkinTone || "Unknown"}`;
       document.getElementById("detectedBodyShape").textContent = `Body shape: ${state.detectedBodyShape || "Unknown"}`;
-
-      // Update color recommendations
-      await updateColorRecommendations();
     }
 
     async function runStyleMatch() {
@@ -372,11 +227,6 @@
         return;
       }
 
-      if (!state.selectedDressTypes.length) {
-        showValidation("Select at least one style preference so matching can rank products correctly.");
-        return;
-      }
-
       const button = document.getElementById("recommendButton");
       button.disabled = true;
       button.textContent = "Matching...";
@@ -386,13 +236,11 @@
           file: state.mode === "auto" ? state.file : null,
           skinTone,
           bodyShape,
-          dressTypes: state.selectedDressTypes,
-          color: state.selectedColor,  // NEW: pass user-selected color
           topK: 8,
           token: AUTH.getToken(),
         });
 
-        document.getElementById("analysisSummary").textContent = `Skin tone: ${data.analysis.skin_tone} | Body shape: ${data.analysis.body_shape} | Styles: ${data.analysis.dress_types.join(", ")}`;
+        document.getElementById("analysisSummary").textContent = `Skin tone: ${data.analysis.skin_tone} | Body shape: ${data.analysis.body_shape}`;
         document.getElementById("resultsGrid").innerHTML = data.results.map((item) => renderProductCard(item, { showSimilarity: true })).join("");
         document.getElementById("resultsSection").classList.remove("hidden");
         document.getElementById("resultsSection").scrollIntoView({ behavior: "smooth" });
@@ -409,16 +257,12 @@
       state.detectedSkinTone = "";
       state.detectedBodyShape = "";
       state.detectedUndertone = "";
-      state.selectedDressTypes = [];
-      state.selectedColor = "";
       document.getElementById("fileInput").value = "";
       document.getElementById("manualSkinTone").value = "";
       document.getElementById("manualBodyShape").value = "";
       document.getElementById("previewBlock").classList.add("hidden");
       document.getElementById("resultsSection").classList.add("hidden");
-      document.getElementById("colorSection").classList.add("hidden");
       clearValidation();
-      renderStyleChips();
     }
 
     document.getElementById("autoModeButton").addEventListener("click", () => setMode("auto"));
@@ -435,17 +279,9 @@
         showValidation("Image analysis failed. Please try another image or switch to Manual Entry.");
       }
     });
-    document.getElementById("manualSkinTone").addEventListener("change", () => {
-      state.selectedColor = "";  // Reset color when skin tone changes
-      updateColorRecommendations();
-    });
-    document.getElementById("manualBodyShape").addEventListener("change", () => {
-      updateColorRecommendations();
-    });
     document.getElementById("recommendButton").addEventListener("click", runStyleMatch);
     document.getElementById("clearButton").addEventListener("click", clearState);
 
-    renderStyleChips();
     setMode("auto");
   </script>
 </body>
