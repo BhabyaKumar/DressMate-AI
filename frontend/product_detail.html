@@ -181,6 +181,7 @@
         renderProduct(cachedProduct);
       }
 
+      // Show skeleton for similar products only (not the whole page)
       showSkeleton(similarGrid, 4);
 
       try {
@@ -195,6 +196,7 @@
           similarGrid.innerHTML = `<div class="col-span-full rounded-3xl bg-white p-10 text-center text-slate-500 border border-slate-100">No similar products available yet.</div>`;
         }
       } catch (error) {
+        console.error("Error loading product:", error);
         document.getElementById("productName").textContent = "Unable to load product";
         document.getElementById("productDescription").textContent = "Please make sure the backend is running and the product exists.";
         similarGrid.innerHTML = "";

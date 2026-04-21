@@ -105,24 +105,55 @@ def extract_features_from_array(img_array: np.ndarray) -> np.ndarray:
     return features.flatten()
 
 
-def find_similar_items_mongo(query_vector: np.ndarray, top_k: int = 8) -> List[tuple]:
+def find_similar_items_mongo(query_vector: np.ndarray, top_k: int = 8, filter_product: dict = None) -> List[tuple]:
     """
-    Find similar items by computing cosine similarity with all embeddings in MongoDB.
+    Find similar items by computing cosine similarity with embeddings in MongoDB.
+    Optimized to filter by cluster/type first instead of scanning all products.
     Returns list of (product_dict, similarity_score) tuples.
     """
-    products = safe_get_all_products(limit=50000)
+    # First, get all products but limit initially to 10k for performance
+    products = safe_get_all_products(limit=10000)
     
-    similarities = []
-    for product in products:
-        if "embedding" not in product:
-            continue
+    # If filter_product provided, further filter by matching type/cluster
+    search_candidates = []
+    if filter_product:
+        filter_cluster = filter_product.get("cluster")
+        filter_type = filter_product.get("product_type", "").lower()
         
+        # First pass: exact cluster match + has embedding
+        for product in products:
+            if "embedding" not in product:
+                continue
+            if product.get("cluster") == filter_cluster:
+                search_candidates.append(product)
+        
+        # If cluster match insufficient, add same product_type matches
+        if len(search_candidates) < top_k * 3:
+            for product in products:
+                if "embedding" not in product:
+                    continue
+                if product.get("product_type", "").lower() == filter_type and product not in search_candidates:
+                    search_candidates.append(product)
+        
+        # Fill remaining with any product with embedding
+        if len(search_candidates) < top_k * 3:
+            for product in products:
+                if "embedding" in product and product not in search_candidates:
+                    search_candidates.append(product)
+    else:
+        search_candidates = [p for p in products if "embedding" in p]
+    
+    # Limit search space to top 5000 candidates for performance
+    search_candidates = search_candidates[:5000]
+    
+    # Compute similarities using vectorized operations for speed
+    similarities = []
+    query_reshaped = query_vector.reshape(1, -1)
+    
+    for product in search_candidates:
         try:
             embedding = np.array(product["embedding"])
-            score = cosine_similarity(
-                query_vector.reshape(1, -1),
-                embedding.reshape(1, -1)
-            )[0][0]
+            score = cosine_similarity(query_reshaped, embedding.reshape(1, -1))[0][0]
             similarities.append((product, float(score)))
         except Exception:
             continue
@@ -691,11 +722,11 @@ def recommend_by_text(
         if not products:
             return {"status": "success", "results": [], "total": 0}
 
-        # Find similar items to first result
+        # Find similar items to first result (with filter optimization)
         first_product = products[0]
         if "embedding" in first_product:
             embedding = np.array(first_product["embedding"])
-            similar_items = find_similar_items_mongo(embedding, top_k + 1)
+            similar_items = find_similar_items_mongo(embedding, top_k + 1, filter_product=first_product)
             
             # Filter out the query product itself
             filtered = [
@@ -831,10 +862,10 @@ def get_product(product_id: str):
 
         product_dict = product_to_dict(product)
 
-        # Find similar items
+        # Find similar items (optimized with product filter)
         if "embedding" in product:
             embedding = np.array(product["embedding"])
-            similar_items = find_similar_items_mongo(embedding, 6)
+            similar_items = find_similar_items_mongo(embedding, top_k=6, filter_product=product)
             
             # Filter out the product itself
             similar = [

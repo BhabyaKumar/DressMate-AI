@@ -1,6 +1,7 @@
 (function () {
   const NAV_ITEMS = [
     { key: "home", href: "index.html", label: "Home" },
+    { key: "about", href: "about_us.html", label: "About Us" },
     { key: "upload", href: "image_upload_page.html", label: "Upload" },
     { key: "browse", href: "browse_products.html", label: "Browse" },
     { key: "style", href: "style_match.html", label: "Style Match" },

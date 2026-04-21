@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DressMate - About Us</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: { 
+            "primary": "#994ce6", 
+            "background-light": "#f7f6f8", 
+            "background-dark": "#191121" 
+          },
+          fontFamily: { "display": ["Inter", "sans-serif"] },
+          borderRadius: { 
+            "DEFAULT": "0.5rem", 
+            "lg": "1rem", 
+            "xl": "1.5rem", 
+            "full": "9999px" 
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { 
+      font-family: 'Inter', sans-serif; 
+    }
+    .team-card {
+      transition: all 0.3s ease;
+    }
+    .team-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 25px -5px rgba(153, 76, 230, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-background-light min-h-screen text-slate-900">
+<script src="layout.js"></script>
+<script src="auth.js"></script>
+
+<div class="layout-container flex h-full grow flex-col">
+
+<!-- Navigation will be injected by layout.js -->
+<header id="placeholder-header" class="flex items-center justify-between border-b border-primary/10 bg-white/80 backdrop-blur-md px-6 py-4 lg:px-20 sticky top-0 z-50">
+  <div class="flex items-center gap-3">
+    <a href="index.html" class="flex items-center gap-3">
+      <div class="bg-primary p-2 rounded-lg text-white"><span class="material-symbols-outlined">apparel</span></div>
+      <h2 class="text-slate-900 text-xl font-bold tracking-tight">DressMate</h2>
+    </a>
+  </div>
+  <nav class="hidden md:flex items-center gap-10">
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="index.html">Home</a>
+    <a class="text-primary text-sm font-medium border-b-2 border-primary" href="about_us.html">About Us</a>
+    <a class="text-slate-600 hover:text-primary transition-colors text-sm font-medium" href="browse_products.html">Browse</a>
+  </nav>
+</header>
+
+<!-- Main Content -->
+<main class="flex-1 flex flex-col">
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-r from-primary/10 to-primary/5 py-16 lg:py-24 px-6 lg:px-20">
+    <div class="max-w-6xl mx-auto text-center">
+      <h1 class="text-4xl md:text-5xl font-black tracking-tight text-slate-900 mb-4">
+        About <span class="text-primary">DressMate</span>
+      </h1>
+      <p class="text-xl text-slate-600 max-w-2xl mx-auto">
+        Revolutionizing fashion discovery through AI-powered style matching and personalized recommendations
+      </p>
+    </div>
+  </section>
+
+  <!-- Mission Section -->
+  <section class="px-6 lg:px-20 py-16 max-w-6xl mx-auto w-full">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+      <div class="bg-white rounded-2xl p-8 border border-primary/10 shadow-sm">
+        <div class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+          <span class="material-symbols-outlined text-2xl">lightbulb</span>
+        </div>
+        <h3 class="text-xl font-bold mb-3 text-slate-900">Our Vision</h3>
+        <p class="text-slate-600">To make fashion accessible, personalized, and sustainable for everyone through intelligent AI technology.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-8 border border-primary/10 shadow-sm">
+        <div class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+          <span class="material-symbols-outlined text-2xl">target</span>
+        </div>
+        <h3 class="text-xl font-bold mb-3 text-slate-900">Our Mission</h3>
+        <p class="text-slate-600">Empower users to discover their unique style by matching outfits with their skin tone, body shape, and personal preferences.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-8 border border-primary/10 shadow-sm">
+        <div class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+          <span class="material-symbols-outlined text-2xl">favorite</span>
+        </div>
+        <h3 class="text-xl font-bold mb-3 text-slate-900">Our Values</h3>
+        <p class="text-slate-600">Inclusivity, innovation, and authenticity. We believe everyone deserves to feel confident in their style.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="bg-slate-50 px-6 lg:px-20 py-16">
+    <div class="max-w-6xl mx-auto w-full">
+      <div class="text-center mb-16">
+        <span class="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">Leadership</span>
+        <h2 class="text-4xl font-black tracking-tight text-slate-900 mt-4 mb-4">
+          Meet Our Team
+        </h2>
+        <p class="text-slate-600 text-lg max-w-2xl mx-auto">
+          A passionate group of innovators dedicated to transforming the fashion industry
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Team Member 1 -->
+        <div class="team-card bg-white rounded-2xl overflow-hidden border border-primary/5 shadow-sm">
+          <div class="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <div class="w-24 h-24 rounded-full bg-primary/30 flex items-center justify-center text-4xl font-bold text-primary">
+              B
+            </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Bhabya Kumar Lal</h3>
+            <p class="text-primary font-semibold text-sm mb-3">Founder & CEO</p>
+            <p class="text-slate-600 text-sm mb-4">
+              Tech visionary with expertise in machine learning and computer vision. Leads the strategic direction and overall product development of DressMate.
+            </p>
+            <div class="flex gap-3">
+              <a href="mailto:bhabya@dressmate.com" class="flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium">
+                <span class="material-symbols-outlined text-lg">mail</span>
+              </a>
+              <a href="tel:+91-9876543210" class="flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium">
+                <span class="material-symbols-outlined text-lg">phone</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Team Member 2 -->
+        <div class="team-card bg-white rounded-2xl overflow-hidden border border-primary/5 shadow-sm">
+          <div class="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <div class="w-24 h-24 rounded-full bg-primary/30 flex items-center justify-center text-4xl font-bold text-primary">
+              T
+            </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Tanisha Sah</h3>
+            <p class="text-primary font-semibold text-sm mb-3">Head of Design & UX</p>
+            <p class="text-slate-600 text-sm mb-4">
+              Creative director focused on user experience and interface design. Ensures DressMate is intuitive, beautiful, and accessible to all users.
+            </p>
+            <div class="flex gap-3">
+              <a href="mailto:tanisha@dressmate.com" class="flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium">
+                <span class="material-symbols-outlined text-lg">mail</span>
+              </a>
+              <a href="tel:+91-9876543211" class="flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium">
+                <span class="material-symbols-outlined text-lg">phone</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Team Member 3 -->
+        <div class="team-card bg-white rounded-2xl overflow-hidden border border-primary/5 shadow-sm">
+          <div class="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <div class="w-24 h-24 rounded-full bg-primary/30 flex items-center justify-center text-4xl font-bold text-primary">
+              K
+            </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-slate-900 mb-2">Keshav Sharma</h3>
+            <p class="text-primary font-semibold text-sm mb-3">Head of Backend Engineering</p>
+            <p class="text-slate-600 text-sm mb-4">
+              Full-stack engineer specializing in scalable systems and APIs. Manages the technical infrastructure and ensures seamless performance.
+            </p>
+            <div class="flex gap-3">
+              <a href="mailto:keshav@dressmate.com" class="flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium">
+                <span class="material-symbols-outlined text-lg">mail</span>
+              </a>
+              <a href="tel:+91-9876543212" class="flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium">
+                <span class="material-symbols-outlined text-lg">phone</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="px-6 lg:px-20 py-16 max-w-6xl mx-auto w-full">
+    <div class="text-center mb-12">
+      <span class="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">Get In Touch</span>
+      <h2 class="text-4xl font-black tracking-tight text-slate-900 mt-4 mb-4">
+        Contact Us
+      </h2>
+      <p class="text-slate-600 text-lg max-w-2xl mx-auto">
+        Have questions? We'd love to hear from you. Get in touch with us today.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <!-- Contact Form -->
+      <div class="bg-white rounded-2xl p-8 border border-primary/5 shadow-sm">
+        <h3 class="text-2xl font-bold mb-6 text-slate-900">Send us a Message</h3>
+        <form id="contactForm" class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Your Name</label>
+            <input type="text" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:outline-none transition-colors" placeholder="John Doe">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+            <input type="email" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:outline-none transition-colors" placeholder="john@example.com">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Subject</label>
+            <input type="text" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:outline-none transition-colors" placeholder="How can we help?">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Message</label>
+            <textarea rows="5" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-primary focus:outline-none transition-colors resize-none" placeholder="Your message here..."></textarea>
+          </div>
+          <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-primary/20">
+            Send Message
+          </button>
+        </form>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="space-y-6">
+        <div class="bg-white rounded-2xl p-8 border border-primary/5 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              <span class="material-symbols-outlined">location_on</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 mb-2">Address</h4>
+              <p class="text-slate-600">
+                DressMate Headquarters<br>
+                Tech Park, Innovation Hub<br>
+                India
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-8 border border-primary/5 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              <span class="material-symbols-outlined">mail</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 mb-2">Email</h4>
+              <p class="text-slate-600">
+                <a href="mailto:support@dressmate.com" class="text-primary hover:text-primary/80">support@dressmate.com</a><br>
+                <a href="mailto:info@dressmate.com" class="text-primary hover:text-primary/80">info@dressmate.com</a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-8 border border-primary/5 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              <span class="material-symbols-outlined">phone</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 mb-2">Phone</h4>
+              <p class="text-slate-600">
+                <a href="tel:+91-1234567890" class="text-primary hover:text-primary/80">+91 (123) 456-7890</a><br>
+                Monday - Friday: 9AM - 6PM IST
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-8 border border-primary/5 shadow-sm">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+              <span class="material-symbols-outlined">language</span>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 mb-2">Follow Us</h4>
+              <div class="flex gap-3">
+                <a href="#" class="text-primary hover:text-primary/80 transition-colors">
+                  <span class="material-symbols-outlined">facebook</span>
+                </a>
+                <a href="#" class="text-primary hover:text-primary/80 transition-colors">
+                  <span class="material-symbols-outlined">close</span>
+                </a>
+                <a href="#" class="text-primary hover:text-primary/80 transition-colors">
+                  <span class="material-symbols-outlined">linked_camera</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-primary/10 bg-white py-10 px-6 lg:px-20 mt-12">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="flex items-center gap-3 opacity-60">
+      <div class="bg-slate-400 p-1.5 rounded text-white scale-75"><span class="material-symbols-outlined">apparel</span></div>
+      <span class="text-sm font-bold text-slate-600">DressMate © 2024</span>
+    </div>
+    <div class="flex gap-8">
+      <a class="text-xs font-medium text-slate-500 hover:text-primary" href="#">Privacy Policy</a>
+      <a class="text-xs font-medium text-slate-500 hover:text-primary" href="#">Terms of Service</a>
+      <a class="text-xs font-medium text-slate-500 hover:text-primary" href="#">Help Center</a>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+<script src="api.js"></script>
+<script>
+  // Initialize shared layout
+  initSharedPage({ activeNav: "about" });
+
+  // Handle contact form submission
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form values
+    const name = this.querySelector('input[type="text"]').value;
+    const email = this.querySelector('input[type="email"]').value;
+    const subject = this.querySelectorAll('input[type="text"]')[1].value;
+    const message = this.querySelector('textarea').value;
+    
+    // Simple validation
+    if (!name || !email || !subject || !message) {
+      alert('Please fill in all fields');
+      return;
+    }
+    
+    // In a real application, this would send to a backend endpoint
+    console.log({name, email, subject, message});
+    alert('Thank you for your message! We\'ll get back to you soon.');
+    
+    // Reset form
+    this.reset();
+  });
+</script>
+</body>
+</html>
