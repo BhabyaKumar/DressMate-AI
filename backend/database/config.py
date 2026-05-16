@@ -62,12 +62,22 @@ def initialize_collections():
         db.create_collection("products")
         print("[ok] Created 'products' collection")
     
-    # Create indexes on products
-    db.products.create_index([("name", ASCENDING)])
+    # Create indexes on products for commonly filtered/sorted fields
+    # This significantly improves query performance
     db.products.create_index([("product_type", ASCENDING)])
     db.products.create_index([("colour", ASCENDING)])
+    db.products.create_index([("brand", ASCENDING)])
     db.products.create_index([("cluster", ASCENDING)])
-    db.products.create_index([("rating", DESCENDING)])
+    db.products.create_index([("price", ASCENDING)])  # For price sorting
+    db.products.create_index([("rating", DESCENDING)])  # For rating sorting
+    
+    # Compound indexes for common filter combinations
+    db.products.create_index([("product_type", ASCENDING), ("colour", ASCENDING)])
+    db.products.create_index([("product_type", ASCENDING), ("price", ASCENDING)])
+    db.products.create_index([("product_type", ASCENDING), ("rating", DESCENDING)])
+    
+    # Text index for search functionality (if needed in future)
+    # db.products.create_index([("name", "text"), ("description", "text"), ("brand", "text")])
     
     # Create users collection
     if "users" not in db.list_collection_names():
@@ -116,11 +126,84 @@ def get_product_by_id(product_id: str) -> Optional[Dict]:
         return db.products.find_one({"_id": int(product_id)})
 
 
-def search_products(query: Dict, limit: int = 50) -> List[Dict]:
-    """Search products with flexible query filters."""
+def get_products_by_ids(product_ids: List[str]) -> List[Dict]:
+    """Get multiple products by IDs in a single batch query."""
     if db is None:
         raise RuntimeError("Not connected to MongoDB")
-    return list(db.products.find(query).limit(limit))
+    from bson.objectid import ObjectId
+    
+    # Try to convert IDs to ObjectId format
+    object_ids = []
+    for pid in product_ids:
+        try:
+            object_ids.append(ObjectId(pid))
+        except:
+            try:
+                object_ids.append(int(pid))
+            except:
+                object_ids.append(pid)
+    
+    # Query by IDs
+    results = list(db.products.find({"_id": {"$in": object_ids}}))
+    return results
+
+
+def search_products(query: Dict, limit: int = 50, skip: int = 0, sort_field: str = None, sort_order: int = 1) -> List[Dict]:
+    """Search products with flexible query filters, pagination, and sorting.
+    
+    Args:
+        query: MongoDB query filter
+        limit: Maximum number of results (default 50)
+        skip: Number of results to skip for pagination (default 0)
+        sort_field: Field to sort by (e.g., 'price', 'rating'). If None, no sorting applied.
+        sort_order: 1 for ascending, -1 for descending (default 1)
+    """
+    if db is None:
+        raise RuntimeError("Not connected to MongoDB")
+    
+    # Use aggregation pipeline for price sorting to convert string to number
+    if sort_field == "price":
+        pipeline = [
+            {"$match": query},
+            {
+                "$addFields": {
+                    "price_numeric": {
+                        "$cond": [
+                            {"$eq": ["$price", None]},
+                            0,
+                            {
+                                "$convert": {
+                                    "input": "$price",
+                                    "to": "double",
+                                    "onError": 0,
+                                    "onNull": 0
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {"$sort": {"price_numeric": sort_order}},
+            {"$skip": skip},
+            {"$limit": limit}
+        ]
+        results = list(db.products.aggregate(pipeline))
+        return results
+    else:
+        # For non-price fields, use regular find + sort
+        cursor = db.products.find(query).skip(skip).limit(limit)
+        if sort_field:
+            cursor = cursor.sort(sort_field, sort_order)
+        return list(cursor)
+
+
+def count_products(query: Dict = None) -> int:
+    """Count products matching a query."""
+    if db is None:
+        raise RuntimeError("Not connected to MongoDB")
+    if query is None:
+        query = {}
+    return db.products.count_documents(query)
 
 
 def delete_all_products():

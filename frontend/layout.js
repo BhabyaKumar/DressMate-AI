@@ -63,7 +63,6 @@
     const email = user?.email || "Sign in to save your style";
     const actionMarkup = user
       ? `
-          <a href="dashboard.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</a>
           <a href="my_wardrobe.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">My Wardrobe</a>
           <button id="sharedLogoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</button>
         `

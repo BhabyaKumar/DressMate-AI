@@ -41,6 +41,7 @@ from vision.body_shape_detector import detect_body_shape
 from fastapi import FastAPI, File, UploadFile, Query, HTTPException, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 
 # Load environment variables from .env file
@@ -52,7 +53,9 @@ from database.config import (
     close_mongodb,
     get_all_products,
     get_product_by_id,
+    get_products_by_ids,
     search_products,
+    count_products,
     insert_recommendation,
     get_user_recommendations,
 )
@@ -89,6 +92,38 @@ def get_resnet():
         from tensorflow.keras.applications import ResNet50
         _resnet = ResNet50(weights="imagenet", include_top=False, pooling="avg")
     return _resnet
+
+
+# ── simple caching for frequently accessed data ────────────────────────────
+_product_cache = {}  # {cache_key: (data, timestamp)}
+_PRODUCT_CACHE_TTL = 300  # 5 minutes for product listings
+
+
+def get_cached(key: str):
+    """Get value from cache if not expired."""
+    if key in _product_cache:
+        data, timestamp = _product_cache[key]
+        if datetime.utcnow().timestamp() - timestamp < _PRODUCT_CACHE_TTL:
+            return data
+        else:
+            del _product_cache[key]
+    return None
+
+
+def set_cached(key: str, data):
+    """Store value in cache with timestamp."""
+    _product_cache[key] = (data, datetime.utcnow().timestamp())
+
+
+def clear_cache_for_pattern(pattern: str = None):
+    """Clear cache entries matching a pattern or all if pattern is None."""
+    global _product_cache
+    if pattern is None:
+        _product_cache.clear()
+    else:
+        keys_to_delete = [k for k in _product_cache.keys() if pattern in k]
+        for k in keys_to_delete:
+            del _product_cache[k]
 
 
 # ── helper utilities ───────────────────────────────────────────────────────
@@ -498,6 +533,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add GZIP compression for faster response transfer (reduces response size 30-80%)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # ── Serve local Images folder as static files ──────────────────────────────
 for _img_dir in ["Images", "images", "data/Images", "data/images"]:
     _img_path = BASE_DIR / _img_dir
@@ -517,6 +555,8 @@ if FRONTEND_DIR.exists():
 def startup_event():
     """Initialize MongoDB connection on app startup."""
     print("[start] Starting FashionAI Backend...")
+    # Clear cache on startup
+    clear_cache_for_pattern()
     if connect_to_mongodb():
         print("[ok] MongoDB ready, app started successfully!")
     else:
@@ -754,6 +794,14 @@ def search_products_endpoint(
 ):
     """Search products by name, brand, or description."""
     try:
+        # Create cache key
+        cache_key = f"search:{query.lower()}:{limit}"
+        
+        # Check cache first
+        cached_result = get_cached(cache_key)
+        if cached_result is not None:
+            return cached_result
+        
         # Build MongoDB filter for text search across multiple fields
         search_filter = {
             "$or": [
@@ -766,17 +814,24 @@ def search_products_endpoint(
         products = safe_search_products(search_filter, limit=limit)
         
         if not products:
-            return {"status": "success", "results": [], "total": 0}
+            response = {"status": "success", "results": [], "total": 0, "query": query}
+            set_cached(cache_key, response)
+            return response
         
         # Convert to dict format with similarity if available
         results = [product_to_dict(p) for p in products]
         
-        return {
+        response = {
             "status": "success",
             "results": results,
             "total": len(results),
             "query": query
         }
+        
+        # Cache the result
+        set_cached(cache_key, response)
+        
+        return response
     except HTTPException:
         raise
     except Exception as e:
@@ -796,6 +851,14 @@ def list_products(
 ):
     """Paginated product listing for browse_products.html."""
     try:
+        # Create cache key from query parameters
+        cache_key = f"products:{product_type}:{color}:{brand}:{sort}:{page}:{per_page}"
+        
+        # Check if result is in cache
+        cached_result = get_cached(cache_key)
+        if cached_result is not None:
+            return cached_result
+        
         # Build MongoDB query
         query = {}
         
@@ -806,35 +869,35 @@ def list_products(
         if brand:
             query["brand"] = {"$regex": brand, "$options": "i"}
 
-        # Get all matching products
-        all_products = safe_search_products(query, limit=50000)
-        total = len(all_products)
-
-        # Sort
+        # Determine MongoDB sort parameters based on user's sort preference
+        sort_field = None
+        sort_order = -1  # -1 for descending
+        
         if sort == "price_asc":
-            all_products.sort(
-                key=lambda x: float(x.get("price", 0) or 0),
-                reverse=False
-            )
+            sort_field = "price"
+            sort_order = 1  # ascending for lowest price first
         elif sort == "price_desc":
-            all_products.sort(
-                key=lambda x: float(x.get("price", 0) or 0),
-                reverse=True
-            )
+            sort_field = "price"
+            sort_order = -1  # descending for highest price first
         elif sort == "rating":
-            all_products.sort(
-                key=lambda x: float(x.get("rating", 0) or 0),
-                reverse=True
-            )
+            sort_field = "rating"
+            sort_order = -1  # descending for highest rating first
+        # else: relevance (no sort)
 
-        # Paginate
-        start = (page - 1) * per_page
-        page_products = all_products[start: start + per_page]
-
-        products = [product_to_dict(p) for p in page_products]
+        # Get total count for pagination info
+        total = count_products(query)
+        
+        # Calculate pagination
+        skip = (page - 1) * per_page
+        
+        # Query database with sorting and pagination at database level
+        all_products = search_products(query, limit=per_page, skip=skip, sort_field=sort_field, sort_order=sort_order)
+        
+        # Convert to response format
+        products = [product_to_dict(p) for p in all_products]
         pages = (total + per_page - 1) // per_page
 
-        return {
+        response = {
             "status":   "success",
             "results":  products,
             "total":    total,
@@ -842,6 +905,11 @@ def list_products(
             "per_page": per_page,
             "pages":    pages,
         }
+        
+        # Cache the result
+        set_cached(cache_key, response)
+        
+        return response
 
     except HTTPException:
         raise
@@ -889,16 +957,18 @@ def get_product(product_id: str):
         raise HTTPException(500, str(e))
 
 
-# ── 5. Skin-tone analysis only ──────────────────────────────────────────────
+# ── 5. Batch product fetch ────────────────────────────────────────────────
 @app.get("/api/batch-products")
 def get_products_batch(ids: str = Query(..., description="Comma-separated product ids")):
+    """Fetch multiple products by IDs in a single batch query (optimized)."""
     try:
         requested_ids = [item.strip() for item in ids.split(",") if item.strip()]
-        results = []
-        for product_id in requested_ids:
-            product = safe_get_product_by_id(product_id)
-            if product:
-                results.append(product_to_dict(product))
+        if not requested_ids:
+            return {"status": "success", "results": [], "total": 0}
+        
+        # Use batch query instead of looping through individual queries
+        products = get_products_by_ids(requested_ids)
+        results = [product_to_dict(product) for product in products]
         return {"status": "success", "results": results, "total": len(results)}
     except Exception as e:
         traceback.print_exc()

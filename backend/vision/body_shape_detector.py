@@ -142,5 +142,5 @@ def recommend_style(body_shape):
             "regular fit"
         ]
     }
-
+    
     return styles.get(body_shape, ["regular fit"])

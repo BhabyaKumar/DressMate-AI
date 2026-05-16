@@ -196,7 +196,7 @@ function renderProductCard(product, { onclick = null, showSimilarity = false } =
   return `
     <div class="product-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer border border-slate-100 group" ${clickAttr}>
       <div class="relative overflow-hidden aspect-[3/4] bg-slate-50">
-        <img src="${imageUrl}" alt="${name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/400x500?text=No+Image'"/>
+        <img src="${imageUrl}" alt="${name}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/400x500?text=No+Image'"/>
         ${simPct !== null ? `<span class="absolute top-2 right-2 bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">${simPct}% match</span>` : ""}
         <button onclick="event.stopPropagation(); toggleFav(this, ${JSON.stringify(id)})" class="absolute top-2 left-2 p-2 bg-white/80 rounded-full shadow hover:bg-white transition">
           <span class="material-symbols-outlined text-slate-400 fav-icon" style="font-size:18px">favorite_border</span>
